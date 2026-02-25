@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             ChapterSeeder::class,
             CurriculumSeeder::class,
             ParticipantSeeder::class,
+            ParticipantChaptersSeeder::class,
+            ParticipantCurriculaSeeder::class,
         ]);
     }
 }

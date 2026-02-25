@@ -10,12 +10,17 @@ class Curriculum extends Model
     /** @use HasFactory<\Database\Factories\CurriculumFactory> */
     use HasFactory;
 
-    public function participants()
-    {
-        return $this->belongsToMany(Participant::class);
-    }
+    protected $fillable = [
+        'chapter_id',
+        'name'
+    ];
+
     public function chapter()
     {
         return $this->belongsTo(Chapter::class);
+    }
+    public function participantCurricula()
+    {
+        return $this->hasMany(ParticipantCurriculum::class);
     }
 }

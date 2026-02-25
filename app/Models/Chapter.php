@@ -16,12 +16,13 @@ class Chapter extends Model
         'name',
     ];
 
-    public function participants(){
-        return $this->belongsToMany(Participant::class)
-            ->withPivot('name')
-            ->withTimestamps();
+    public function course(){
+        return $this->belongsTo(Course::class);
     }
     public function curricula(){
         return $this->hasMany(Curriculum::class);
+    }
+    public function participantChapters(){
+        return $this->hasMany(ParticipantChapter::class);
     }
 }

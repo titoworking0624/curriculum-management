@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('curriculum_participant', function (Blueprint $table) {
+        Schema::create('participant_curricula', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('participant_id')->constrained();
-            $table->foreignId('curriculum_id')->constrained();
+            $table->foreignId('participant_chapter_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('curriculum_id')->constrained('curricula')->cascadeOnDelete();
             $table->date('starting_date')->nullable();
             $table->date('completion_date')->nullable();
             $table->timestamps();
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('curriculum_participant');
+        Schema::dropIfExists('participant_curricula');
     }
 };

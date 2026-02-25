@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('curricula', function (Blueprint $table) {
+        Schema::create('participant_chapters', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('participant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('chapter_id')->constrained()->cascadeOnDelete();
-            $table->integer('curriculum_number');
-            $table->string('curriculum_code')->nullable();
-            $table->string('name');
-            $table->text('content');
-            $table->text('checklist');
+            $table->integer('chapter_order');
+            $table->date('starting_date')->nullable();
+            $table->date('completion_date')->nullable();
             $table->timestamps();
+
+            $table->unique(['participant_id','chapter_id']);
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('curricula');
+        Schema::dropIfExists('participant_chapters');
     }
 };
