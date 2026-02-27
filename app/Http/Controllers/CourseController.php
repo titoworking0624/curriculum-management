@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCourseRequest;
 use App\Http\Requests\UpdateCourseRequest;
 use App\Models\Course;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class CourseController extends Controller
 {
@@ -13,7 +15,11 @@ class CourseController extends Controller
      */
     public function index()
     {
-        //
+        $courses = Course::get();
+
+        return Inertia::render('Course/Index',[
+            'courses' => $courses
+        ]);
     }
 
     /**
@@ -21,7 +27,7 @@ class CourseController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Course/Create');
     }
 
     /**
@@ -29,7 +35,14 @@ class CourseController extends Controller
      */
     public function store(StoreCourseRequest $request)
     {
-        //
+        // dd($request);
+        // DB::beginTransaction();
+        Course::create([
+            'course_code' => $request->code,
+            'name' => $request->name,
+
+            ]);
+            return to_route('courses.index');
     }
 
     /**
@@ -37,7 +50,13 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        //
+        // dd($course);
+        $chapters = $course->chapters()->get();
+        // dd($chapters);
+        return Inertia::render('Course/Show', [
+            'course' => $course,
+            'chapters' => $chapters,
+        ]);
     }
 
     /**
@@ -45,7 +64,9 @@ class CourseController extends Controller
      */
     public function edit(Course $course)
     {
-        //
+        return Inertia::render('Course/Edit',[
+            'course' => $course,
+        ]);
     }
 
     /**

@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\ChapterController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\ParticipantController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -29,4 +32,7 @@ require __DIR__.'/auth.php';
 
 Route::get('/',[ParticipantController::class,'index'])->name('index');
 
-Route::resource('paticipant', ParticipantController::class,['only' => []]);
+Route::resource('/paticipant', ParticipantController::class,['only' => []]);
+Route::resource('/courses', CourseController::class,['only' => ['index','create','store','edit','update','show']]);
+Route::resource('/chapters', ChapterController::class,['only' => ['create','show']]);
+Route::resource('/curricula', CurriculumController::class,['only' => ['create','show']]);

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreChapterRequest;
 use App\Http\Requests\UpdateChapterRequest;
 use App\Models\Chapter;
+use App\Models\Course;
+use Inertia\Inertia;
 
 class ChapterController extends Controller
 {
@@ -37,7 +39,16 @@ class ChapterController extends Controller
      */
     public function show(Chapter $chapter)
     {
-        //
+        // dd($course);
+        $curricula = $chapter->curricula()->get();
+        // dd($chapters);
+        $course_name = $chapter->course()->first()->name;
+        // dd($course_name);
+        return Inertia::render('Chapter/Show', [
+            'curricula' => $curricula,
+            'chapter' => $chapter,
+            'course_name' => $course_name,
+        ]);
     }
 
     /**

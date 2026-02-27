@@ -25,6 +25,7 @@ class ParticipantController extends Controller
         pch.participant_id,
         pc.starting_date,
         c.curriculum_code as curriculum_code,
+        c.name as curriculum_name,
         ROW_NUMBER() OVER (
             PARTITION BY pch.participant_id
             ORDER BY c.curriculum_number
@@ -39,6 +40,7 @@ class ParticipantController extends Controller
                 'p.id as pa_id',
                 'p.name as pa_name',
                 't.curriculum_code as cu_code',
+                't.curriculum_name as cu_name',
                 't.starting_date as st_date',
             ])
             ->orderBy('p.name')
