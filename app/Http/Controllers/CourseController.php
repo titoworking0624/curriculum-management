@@ -74,7 +74,15 @@ class CourseController extends Controller
      */
     public function update(UpdateCourseRequest $request, Course $course)
     {
-        //
+        // dd($request->name);
+        // dd($course);
+        $course->course_code = $request->code;
+        $course->name = $request->name;
+        $course->save();
+
+        return Inertia::render('Course/Edit', [
+            'course' => $course,
+        ]);
     }
 
     /**

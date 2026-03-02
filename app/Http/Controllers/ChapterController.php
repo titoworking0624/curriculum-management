@@ -6,6 +6,8 @@ use App\Http\Requests\StoreChapterRequest;
 use App\Http\Requests\UpdateChapterRequest;
 use App\Models\Chapter;
 use App\Models\Course;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ChapterController extends Controller
@@ -21,9 +23,17 @@ class ChapterController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        // dd($request->course_id);
+        $course = Course::find($request->query('course_id'));
+        // dd($courseId);
+        $courses = Course::with('chapters')->get();
+
+        return Inertia::render('Chapter/Create', [
+            'course' => $course,
+            'courses' => $courses,
+        ]);
     }
 
     /**
@@ -31,7 +41,24 @@ class ChapterController extends Controller
      */
     public function store(StoreChapterRequest $request)
     {
-        //
+        DB::beginTransaction();
+        // dd($request);
+
+        try {
+            $chapter = Chapter::create([
+                'chapter_number' => $request->chapter_number,
+                'course_id' => $request->course_id,
+                'name' => $request->name,
+                ]);
+
+            DB::commit();
+
+            return to_route('courses.show', [
+                'course' => $chapter->course_id
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+        }
     }
 
     /**
@@ -42,12 +69,12 @@ class ChapterController extends Controller
         // dd($course);
         $curricula = $chapter->curricula()->get();
         // dd($chapters);
-        $course_name = $chapter->course()->first()->name;
-        // dd($course_name);
+        $course = $chapter->course()->first();
+        // dd($course);
         return Inertia::render('Chapter/Show', [
             'curricula' => $curricula,
             'chapter' => $chapter,
-            'course_name' => $course_name,
+            'course' => $course,
         ]);
     }
 

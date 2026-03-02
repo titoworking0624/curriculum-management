@@ -25,7 +25,7 @@ defineProps({
             </tr>
           </thead>
           <tbody>
-              <tr v-for="p in participants">
+              <tr v-for="p in participants" :key="p.id">
                   <td class="px-4 py-3"><PrimaryButton>確認</PrimaryButton></td>
                   <td class="px-4 py-3">{{p.pa_name}}</td>
                   <td class="px-4 py-3">{{p.cu_code}}</td>

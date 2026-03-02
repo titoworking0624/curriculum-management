@@ -12,15 +12,18 @@ const props = defineProps({
         required:true
     },
     curricula:Object,
-    course_name:String,
+    course:{
+        type:Object,
+        required:true,
+    },
 })
 
-const decoration = props.course_name + "第" + props.chapter.chapter_number + "章"
+const decoration = props.course.name + "第" + props.chapter.chapter_number + "章"
 </script>
 
 <template>
     <ListLayout :title="chapter.name" :decoration="decoration">
-        <CreateButton :href="route('curricula.create')">カリキュラム登録</CreateButton>
+        <CreateButton :href="route('curricula.create',{chapter_id: props.chapter.id,course_id:props.course.id})">カリキュラム登録</CreateButton>
         <table class="table-auto w-full text-left whitespace-no-wrap">
           <thead>
             <tr>

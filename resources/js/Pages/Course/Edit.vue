@@ -46,7 +46,7 @@ const form = useForm({
             </div>
           </div> -->
           <div class="p-2 w-full">
-            <SubmitButton class="mx-auto mt-8">登録する</SubmitButton>
+            <SubmitButton class="mx-auto mt-8">更新する</SubmitButton>
           </div>
         </form>
     </FormLayout>

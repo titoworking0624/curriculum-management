@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCurriculumRequest;
 use App\Http\Requests\UpdateCurriculumRequest;
+use App\Models\Chapter;
 use App\Models\Curriculum;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CurriculumController extends Controller
 {
@@ -19,9 +22,19 @@ class CurriculumController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        // dd($request->chapter_id);
+        // dd($request->course_id);
+        $chapter = Chapter::find($request->query('chapter_id'));
+        // dd($chapter);
+        $chapters = Chapter::where('course_id',$request->query('course_id'))->get();
+        // dd($chapters);
+
+        return Inertia::render('Curriculum/Create', [
+            'chapter' => $chapter,
+            'chapters' => $chapters,
+        ]);
     }
 
     /**

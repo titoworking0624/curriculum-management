@@ -17,6 +17,8 @@ return new class extends Migration
             $table->integer('chapter_number');
             $table->string('name');
             $table->timestamps();
+
+            $table->unique(['course_id', 'chapter_number']);
         });
     }
 

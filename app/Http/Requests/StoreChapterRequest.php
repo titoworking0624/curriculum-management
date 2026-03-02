@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreChapterRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class StoreChapterRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,8 +22,17 @@ class StoreChapterRequest extends FormRequest
      */
     public function rules(): array
     {
+        // dd('rules');
+
         return [
-            //
+            'course_id' => ['required','exists:courses,id'],
+            'chapter_number' => [
+                'required',
+                Rule::unique('chapters')
+                    ->where(fn($q) =>
+                        $q->where('course_id',$this->course_id)
+                    ),
+                ],
         ];
     }
 }

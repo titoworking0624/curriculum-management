@@ -16,11 +16,12 @@ import { Link } from '@inertiajs/vue3';
       <NavLink href="/" class="mr-5 hover:text-gray-900">受講者一覧</NavLink>
       <NavLink href="/courses" class="mr-5 hover:text-gray-900">コース一覧</NavLink>
     </nav>
-    <button class="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mt-4 md:mt-0">Button
-      <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-1" viewBox="0 0 24 24">
-        <path d="M5 12h14M12 5l7 7-7 7"></path>
-      </svg>
-    </button>
+    <Link as="button" :href="route('courses.create')" class="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mx-2 mt-4 md:mt-0">受講者登録
+    </Link>
+    <Link as="button" :href="route('courses.create')" class="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mx-2 mt-4 md:mt-0">コース作成
+    </Link>
+    <Link as="button" :href="route('chapters.create')" class="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded mx-2 text-base mt-4 md:mt-0">章作成
+    </Link>
   </div>
 </header>
 </template>
