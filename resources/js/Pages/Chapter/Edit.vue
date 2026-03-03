@@ -4,50 +4,32 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SubmitButton from '@/Components/SubmitButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import ChapterList from '@/Layouts/Chapter/ChapterList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
-import { Course } from '@/types/course';
 import { useForm } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
 
-const props = defineProps<{
-    courses:Course[],
-    course:Course,
+const props = defineProps({
+    chapter:{
+        type:Object,
+        required:true,
+    },
+    course:Object,
     errors:Object,
-    }>()
-
-const form = useForm({
-    course_id:props.course?.id ??null,
-    chapter_number:null,
-    name:null,
 })
 
-// const selectedCourseId = ref(form.course_id);
-
-const filteredChapters = computed(() => {
-    const course = props.courses.find(
-        c => c.id === form.course_id
-    )
-
-    return course?.chapters ?? []
+const form = useForm({
+    id:props.chapter.id,
+    course_id:props.chapter.course_id,
+    chapter_number:props.chapter.chapter_number,
+    name:props.chapter.name,
 })
 </script>
 
 <template>
-    <FormLayout title="章作成">
-        <form @submit.prevent="form.post('/chapters')" class="flex flex-col -m-2">
+    <FormLayout title="コース編集">
+        <form @submit.prevent="form.put(route('chapters.update',{chapter:form.id}))" class="flex flex-col -m-2">
           <div class="p-2">
             <div class="relative">
-                <InputLabel for="course" class="leading-7 text-sm text-gray-600" value="使用コース" />
-                <select name="course" id="course" v-model="form.course_id">
-                    <option v-for="c in courses" :key="c.id" :value="c.id">{{ c.course_code }}：{{ c.name }}</option>
-                </select>
-            </div>
-          </div>
-          <ChapterList :chapters="filteredChapters" :show="false"/>
-          <div class="p-2">
-            <div class="relative">
-                <InputLabel for="chapter_number" class="leading-7 text-sm text-gray-600" value="章順" />
+                <InputLabel for="chapter_number" class="leading-7 text-sm text-gray-600" value="章番号" />
                 <input type="number" id="chapter_number" name="chapter_number" v-model="form.chapter_number" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                 <InputError :message="form.errors.chapter_number"/>
             </div>
@@ -66,7 +48,7 @@ const filteredChapters = computed(() => {
             </div>
           </div> -->
           <div class="p-2 w-full">
-            <SubmitButton class="mx-auto mt-8">登録する</SubmitButton>
+            <SubmitButton class="mx-auto mt-8">更新する</SubmitButton>
           </div>
         </form>
     </FormLayout>

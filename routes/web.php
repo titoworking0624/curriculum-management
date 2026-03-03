@@ -34,5 +34,5 @@ Route::get('/',[ParticipantController::class,'index'])->name('index');
 
 Route::resource('/paticipant', ParticipantController::class,['only' => []]);
 Route::resource('/courses', CourseController::class,['only' => ['index','create','store','edit','update','show']]);
-Route::resource('/chapters', ChapterController::class,['only' => ['create','store','show']]);
-Route::resource('/curricula', CurriculumController::class,['only' => ['create','show']]);
+Route::resource('/chapters', ChapterController::class,['only' => ['create','store','show','edit','update']]);
+Route::resource('/curricula', CurriculumController::class,['only' => ['create','store','show', 'edit', 'update']]);

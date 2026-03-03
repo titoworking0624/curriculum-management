@@ -12,7 +12,11 @@ class Curriculum extends Model
 
     protected $fillable = [
         'chapter_id',
-        'name'
+        'curriculum_number',
+        'curriculum_code',
+        'name',
+        'content',
+        'checklist',
     ];
 
     public function chapter()

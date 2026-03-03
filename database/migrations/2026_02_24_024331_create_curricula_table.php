@@ -20,6 +20,8 @@ return new class extends Migration
             $table->text('content');
             $table->text('checklist');
             $table->timestamps();
+
+            $table->unique(['chapter_id', 'curriculum_number']);
         });
     }
 

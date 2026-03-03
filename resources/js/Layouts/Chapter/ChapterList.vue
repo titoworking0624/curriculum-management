@@ -4,13 +4,8 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import HeadLayout from '@/Layouts/HeadLayout.vue';
 import ListLayout from '@/Layouts/ListLayout.vue';
+import { Chapter } from '@/types/course';
 import { Head } from '@inertiajs/vue3';
-
-type Chapter = {
-    id:number,
-    name:string,
-    chapter_number:number,
-}
 
 withDefaults(
     defineProps<{
@@ -42,7 +37,7 @@ withDefaults(
                   <td class="px-4 py-3">{{c.chapter_number}}</td>
                   <td class="px-4 py-3">{{c.name}}</td>
                   <td v-if="show" class="px-4 py-3">
-                      <SecondaryButton v-if="show">編集</SecondaryButton>
+                      <SecondaryButton :href="route('chapters.edit',{chapter:c.id})" v-if="show">編集</SecondaryButton>
                   </td>
 
               </tr>

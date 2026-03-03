@@ -31,7 +31,7 @@ class StoreChapterRequest extends FormRequest
                 Rule::unique('chapters')
                     ->where(fn($q) =>
                         $q->where('course_id',$this->course_id)
-                    ),
+                    )
                 ],
         ];
     }

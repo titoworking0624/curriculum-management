@@ -83,7 +83,14 @@ class ChapterController extends Controller
      */
     public function edit(Chapter $chapter)
     {
-        //
+        // dd($chapter);
+        $course = $chapter->course()->with('chapters')->first();
+        // dd($course);
+
+        return Inertia::render('Chapter/Edit',[
+            'course' => $course,
+            'chapter' => $chapter,
+        ]);
     }
 
     /**
@@ -91,7 +98,17 @@ class ChapterController extends Controller
      */
     public function update(UpdateChapterRequest $request, Chapter $chapter)
     {
-        //
+        $chapter->chapter_number = $request->chapter_number;
+        $chapter->name = $request->name;
+        $chapter->save();
+
+        $course = $chapter->course()->first();
+        $chapters = $course->chapters()->get();
+
+        return to_route('courses.show', [
+            'course' => $course,
+            'chapters' => $chapters,
+        ]);
     }
 
     /**

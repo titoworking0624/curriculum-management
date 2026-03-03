@@ -22,6 +22,8 @@ import { Link } from '@inertiajs/vue3';
     </Link>
     <Link as="button" :href="route('chapters.create')" class="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded mx-2 text-base mt-4 md:mt-0">章作成
     </Link>
+    <Link as="button" :href="route('curricula.create')" class="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded mx-2 text-base mt-4 md:mt-0">カリキュラム作成
+    </Link>
   </div>
 </header>
 </template>

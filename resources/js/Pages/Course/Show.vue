@@ -5,19 +5,9 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import ChapterList from '@/Layouts/Chapter/ChapterList.vue';
 import HeadLayout from '@/Layouts/HeadLayout.vue';
 import ListLayout from '@/Layouts/ListLayout.vue';
+import { Chapter, Course } from '@/types/course';
 import { Head } from '@inertiajs/vue3';
 
-type Chapter = {
-    id: number
-    name:string
-    chapter_number:number
-}
-
-type Course = {
-    id:number
-    name:string
-    course_code:number
-}
 const props = defineProps<{
     course:Course
     chapters:Chapter[]
