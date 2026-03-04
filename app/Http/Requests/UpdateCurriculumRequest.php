@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateCurriculumRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class UpdateCurriculumRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,18 @@ class UpdateCurriculumRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
-        ];
-    }
+            'chapter_id' => ['required', 'exists:chapters,id'],
+            'name' => ['required'],
+            'content' => ['required','string'],
+            'checklist' => ['nullable','string'],
+            'curriculum_number' => [
+                'required',
+                Rule::unique('curricula')
+                    ->where(
+                        fn($q) =>
+                        $q->where('chapter_id', $this->chapter_id)
+                    )->ignore($this->curriculum),
+            ],
+            'curriculum_code' => ['nullable', 'string'],
+        ];    }
 }

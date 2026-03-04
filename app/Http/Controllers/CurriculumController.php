@@ -79,7 +79,16 @@ class CurriculumController extends Controller
      */
     public function show(Curriculum $curriculum)
     {
-        //
+        $chapter = $curriculum->chapter()->with('curricula')->first();
+        $course = $chapter->course()->first();
+
+        // dd($chapter);
+
+        return Inertia::render('Curriculum/Show', [
+            'curriculum' => $curriculum,
+            'chapter' => $chapter,
+            'course' => $course,
+        ]);
     }
 
     /**
@@ -87,7 +96,14 @@ class CurriculumController extends Controller
      */
     public function edit(Curriculum $curriculum)
     {
-        //
+        $chapter = $curriculum->chapter()->with('curricula')->first();
+        $course = $chapter->course()->first();
+        // dd($course);
+        return Inertia::render('Curriculum/Edit', [
+            'curriculum' => $curriculum,
+            'chapter' => $chapter,
+            'course' => $course,
+        ]);
     }
 
     /**
@@ -95,7 +111,20 @@ class CurriculumController extends Controller
      */
     public function update(UpdateCurriculumRequest $request, Curriculum $curriculum)
     {
-        //
+        // dd($request);
+        DB::beginTransaction();
+        try{
+            $curriculum->update($request->validated());
+
+            DB::commit();
+
+            return to_route('chapters.show',[
+                'chapter' => $curriculum->chapter_id
+            ]);
+
+        }catch(\Exception $e){
+            DB::rollBack();
+        }
     }
 
     /**

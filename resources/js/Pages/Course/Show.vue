@@ -17,7 +17,10 @@ const title = props.course.name + "(" + props.course.course_code + ")"
 
 <template>
     <ListLayout :title="title" decoration="コース名：">
-        <CreateButton :href="route('chapters.create',{course_id: props.course.id})">章登録</CreateButton>
+        <div class="flex">
+            <h2 class="font-medium title-font text-2xl w-full mt-2 pl-4 text-gray-900">章一覧</h2>
+            <CreateButton :href="route('chapters.create',{course_id: props.course.id})">章登録</CreateButton>
+        </div>
         <ChapterList :chapters="props.chapters" />
     </ListLayout>
 

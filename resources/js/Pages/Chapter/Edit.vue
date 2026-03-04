@@ -25,7 +25,7 @@ const form = useForm({
 </script>
 
 <template>
-    <FormLayout title="コース編集">
+    <FormLayout title="章編集">
         <form @submit.prevent="form.put(route('chapters.update',{chapter:form.id}))" class="flex flex-col -m-2">
           <div class="p-2">
             <div class="relative">

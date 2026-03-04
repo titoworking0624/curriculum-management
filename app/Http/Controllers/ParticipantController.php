@@ -96,7 +96,14 @@ class ParticipantController extends Controller
      */
     public function show(Participant $participant)
     {
-        //
+        $curriculum = $participant->currentCurriculum()->curriculum;
+        // dd($participant->currentCurriculum());
+        // dd($curriculum->checklist);
+
+        return Inertia::render('Participant/Show',[
+            'participant' => $participant,
+            'curriculum' => $curriculum,
+        ]);
     }
 
     /**
@@ -122,4 +129,5 @@ class ParticipantController extends Controller
     {
         //
     }
+
 }

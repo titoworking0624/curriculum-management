@@ -34,6 +34,7 @@ class StoreCurriculumRequest extends FormRequest
                         $q->where('chapter_id', $this->chapter_id)
                     ),
             ],
+            'curriculum_code' => ['nullable', 'string'],
         ];
     }
 }
