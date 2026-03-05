@@ -26,3 +26,7 @@ export type Participant = {
     id: number
     name: string
 };
+
+export type ChapterWithCourseName = Chapter & {
+    courseName: string;
+};

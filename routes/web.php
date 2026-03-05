@@ -20,7 +20,7 @@ use Inertia\Inertia;
 
 // Route::get('/dashboard', function () {
 //     return Inertia::render('Dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+// })->name('dashboard');
 
 // Route::middleware('auth')->group(function () {
 //     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -32,7 +32,7 @@ require __DIR__.'/auth.php';
 
 Route::get('/',[ParticipantController::class,'index'])->name('index');
 
-Route::resource('/participants', ParticipantController::class,['only' => ['show']]);
+Route::resource('/participants', ParticipantController::class,['only' => ['create','show']]);
 Route::resource('/courses', CourseController::class,['only' => ['index','create','store','edit','update','show']]);
 Route::resource('/chapters', ChapterController::class,['only' => ['create','store','show','edit','update']]);
 Route::resource('/curricula', CurriculumController::class,['only' => ['create','store','show', 'edit', 'update']]);

@@ -16,7 +16,7 @@ import { Link } from '@inertiajs/vue3';
       <NavLink href="/" class="mr-5 hover:text-gray-900">受講者一覧</NavLink>
       <NavLink href="/courses" class="mr-5 hover:text-gray-900">コース一覧</NavLink>
     </nav>
-    <Link as="button" :href="route('courses.create')" class="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mx-2 mt-4 md:mt-0">受講者登録
+    <Link as="button" :href="route('participants.create')" class="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mx-2 mt-4 md:mt-0">受講者登録
     </Link>
     <Link as="button" :href="route('courses.create')" class="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mx-2 mt-4 md:mt-0">コース作成
     </Link>

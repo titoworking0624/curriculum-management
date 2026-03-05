@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreParticipantRequest;
 use App\Http\Requests\UpdateParticipantRequest;
+use App\Models\Course;
 use App\Models\Participant;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -56,7 +57,11 @@ class ParticipantController extends Controller
      */
     public function create()
     {
-        //
+        $courses = Course::with('chapters')->get();
+
+        return Inertia::render('Participant/Create',[
+            'courses' => $courses
+        ]);
     }
 
     /**
