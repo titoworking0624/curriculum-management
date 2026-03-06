@@ -31,7 +31,7 @@ defineProps({
                   <td class="px-4 py-3">{{p.cu_code}}</td>
                   <td class="px-4 py-3">{{p.cu_name}}</td>
                   <td class="px-4 py-3">{{p.st_date}}</td>
-                  <td class="px-4 py-3"><SecondaryButton>編集</SecondaryButton></td>
+                  <td class="px-4 py-3"><SecondaryButton :href="route('participants.edit',{participant:p.pa_id})">編集</SecondaryButton></td>
               </tr>
           </tbody>
         </table>

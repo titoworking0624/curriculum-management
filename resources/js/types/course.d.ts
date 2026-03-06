@@ -30,3 +30,23 @@ export type Participant = {
 export type ChapterWithCourseName = Chapter & {
     courseName: string;
 };
+
+export type ParticipantChapter = {
+    chapter: Chapter
+    participantCurricula:ParticipantCurriculum[]
+}
+
+export type ParticipantCurriculum = {
+    curriculum:Curriculum
+}
+
+export type EditChapterWithCourseName = ChapterWithCourseName & {
+    chapter_order:number
+}
+
+export type CurriculumWithCourseName = {
+    chapter:Chapter
+    curriculum: Curriculum
+    courseName:string
+
+}

@@ -12,6 +12,7 @@ class ParticipantChapter extends Model
     protected $fillable = [
         'participant_id',
         'chapter_id',
+        'chapter_order',
         'starting_date',
         'completion_date',
     ];
@@ -39,16 +40,19 @@ class ParticipantChapter extends Model
             'current_participant_curriculum_id'
         );
     }
-    // public function syncCurricula()
-    // {
-    //     $curricula = $this->chapter->curricula;
+    public function syncCurricula()
+    {
+        $curricula = $this->chapter->curricula;
 
-    //     foreach ($curricula as $curriculum) {
-    //         $this->participantCurricula()->create([
-    //             'curriculum_id' => $curriculum->id,
-    //         ]);
-    //     }
-    // }
+        // dd($curricula);
+        foreach ($curricula as $curriculum) {
+            // dd($curriculum);
+            $this->participantCurricula()->create([
+                'curriculum_id' => $curriculum->id,
+                'starting_date' => $curriculum->curriculum_number === 1 ? now() : null,
+            ]);
+        }
+    }
     // /**
     //  * 章完了判定
     //  */

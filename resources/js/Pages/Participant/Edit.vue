@@ -7,27 +7,48 @@ import SubmitButton from '@/Components/SubmitButton.vue';
 import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
 import ParticipantChapter from '@/Layouts/Participant/ParticipantChapter.vue';
-import { Chapter, ChapterWithCourseName, Course, Curriculum } from '@/types/course';
+import ParticipantCurricula from '@/Layouts/Participant/ParticipantCurricula.vue';
+import { Chapter, ChapterWithCourseName, Course, Curriculum, CurriculumWithCourseName, Participant, ParticipantChapter as PC} from '@/types/course';
 import { useForm } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
     courses: Course[];
-    // chapter: Chapter | null;
+    participant:Participant,
+    participantChapters: CurriculumWithCourseName[]
     errors: Object;
 }>();
-const selectedChapters = ref<ChapterWithCourseName[]>([])
 
 const form = useForm({
     // chapter_id: props.chapter?.id ?? 0,
-    chapters:selectedChapters,
-    name: null,
+    chapters:[] as number[],
+    name: props.participant.name,
 });
+form.chapters = props.participantChapters.map(pc => pc.chapter.id)
 
-const designCourseId = {
-    courseId : 1,
-    chapter_number: 1,
+const allChapters = computed<ChapterWithCourseName[]>(() =>
+  props.courses.flatMap(course =>
+    course.chapters.map(ch => ({
+      ...ch,
+      courseName: course.name
+    }))
+  )
+)
+
+const selectedChapters = computed(() =>
+  allChapters.value.filter(ch => form.chapters.includes(ch.id))
+)
+
+const addChapter = (chapterId:number) => {
+  if(!form.chapters.includes(chapterId)){
+    form.chapters.push(chapterId)
+  }
 }
+const removeChapter = (chapterId:number) => {
+  form.chapters = form.chapters.filter(id => id !== chapterId)
+}
+
+const selectedCurricula = ref<CurriculumWithCourseName[]>(props.participantChapters)
 
 // const addCourses = props.courses.find(c => c.id === designCourseId)
 
@@ -71,18 +92,18 @@ const handleSelectChapter = (chapter: ChapterWithCourseName) => {
         selectedChapters.value.push(chapter)
     }
 }
-const removeChapter = (id: number) => {
-    selectedChapters.value = selectedChapters.value.filter(c => c.id !== id)
-}
+// const removeChapter = (id: number) => {
+//     selectedChapters.value = selectedChapters.value.filter(c => c.id !== id)
+// }
 const storeParticipant = () => {
-    form.chapters = selectedChapters
+    // form.chapters = selectedChapters
     form.post('/participants')
 }
 
 </script>
 
 <template>
-    <FormLayout title="受講者登録">
+    <FormLayout title="受講者編集">
         <form
         @submit.prevent="storeParticipant"
         class="-m-2 flex flex-col"
@@ -102,6 +123,17 @@ const storeParticipant = () => {
                     class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
                 />
                 <InputError :message="form.errors.name" />
+            </div>
+        </div>
+        <div class="p-2">
+            <div class="relative">
+                <InputLabel
+                    :label="false"
+                    class="text-sm leading-7 text-gray-600"
+                    value="受講カリキュラム"
+                />
+                <ParticipantCurricula :curricula="selectedCurricula" @removeChapter="removeChapter"
+                    class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200" />
             </div>
         </div>
             <div class="flex h-16 justify-between mb-4">
@@ -147,7 +179,7 @@ const storeParticipant = () => {
                     <InputLabel
                         :label="false"
                         class="text-sm leading-7 text-gray-600"
-                        value="受講カリキュラム"
+                        value="受講チャプター"
                     />
                     <ParticipantChapter :chapters="selectedChapters" @removeChapter="removeChapter"
                         class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200" />

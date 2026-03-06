@@ -10,6 +10,7 @@ class Participant extends Model
     /** @use HasFactory<\Database\Factories\ParticipantFactory> */
     use HasFactory;
 
+    protected $fillable = ['name'];
     // protected $appends = ['current_curriculum'];
 
     public function participantChapters()

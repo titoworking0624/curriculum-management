@@ -69,31 +69,51 @@ class ParticipantController extends Controller
      */
     public function store(StoreParticipantRequest $request)
     {
-        // DB::transaction(function () use ($participant, $chapter) {
+        // dd($request);
+        DB::transaction(function () use ($request) {
+            $participant = Participant::create([
+                'name' => $request->name
+            ]);
 
-        //     $participantChapter = $participant->participantChapters()->create([
-        //         'chapter_id' => $chapter->id,
-        //         'starting_date' => now(),
-        //     ]);
+            $chapters = $request->chapters;
 
-        //     // curricula生成
-        //     foreach ($chapter->curricula as $curriculum) {
-        //         $participantChapter->participantCurricula()->create([
-        //             'curriculum_id' => $curriculum->id,
-        //         ]);
-        //     }
+            // dd($chapters);
+            $chapterOrder = 1;
+            foreach($chapters as $chapter){
+                // dd($chapter['id']);
+                $participantChapter = $participant->participantChapters()->create([
+                    'chapter_id' => $chapter['id'],
+                    'chapter_order' => $chapterOrder,
+                    'starting_date' => $chapterOrder === 1 ? now() : null,
+                ]);
+                // curricula生成
+                if($chapterOrder === 1){
+                    // dd($chapterOrder);
+                    $participantChapter->syncCurricula();
+                    // dd($participantChapter->participantCurricula());
+                }
+                $chapterOrder++;
+            }
 
-        //     // 最初のcurriculumをcurrentにセット
-        //     $first = $participantChapter->participantCurricula()
-        //         ->join('curricula', 'participant_curricula.curriculum_id', '=', 'curricula.id')
-        //         ->orderBy('curricula.curriculum_number')
-        //         ->select('participant_curricula.*')
-        //         ->first();
+            // 最初のcurriculumをcurrentにセット
+            // $first = $participantChapter->participantCurricula()
+            //     ->join('curricula', 'participant_curricula.curriculum_id', '=', 'curricula.id')
+            //     ->orderBy('curricula.curriculum_number')
+            //     ->select('participant_curricula.*')
+            //     ->first();
+            // // 最初のcurriculumをcurrentにセット
+            // $first = $participantChapter->participantCurricula()
+            //     ->join('curricula', 'participant_curricula.curriculum_id', '=', 'curricula.id')
+            //     ->orderBy('curricula.curriculum_number')
+            //     ->select('participant_curricula.*')
+            //     ->first();
 
-        //     $participantChapter->update([
-        //         'current_participant_curriculum_id' => $first?->id,
-        //     ]);
-        // });
+            // $participantChapter->update([
+            //     'current_participant_curriculum_id' => $first?->id,
+            // ]);
+        });
+
+        return to_route('index');
     }
 
     /**
@@ -116,7 +136,29 @@ class ParticipantController extends Controller
      */
     public function edit(Participant $participant)
     {
-        //
+        $courses = Course::with('chapters')->get();
+
+        $participantChapters = $participant->participantChapters()
+            ->with('chapter.course','participantCurricula.curriculum')
+            ->get()
+            ->flatMap(function ($pc) {
+                return $pc->participantCurricula->map(function($pcur) use ($pc){
+                    return [
+                        'chapter' => $pc->chapter,
+                        'curriculum' => $pcur->curriculum,
+                        'courseName' => $pc->chapter->course->name,
+                    ];
+                });
+            })
+            ;
+        // $participantCurricula = $participantChapters->participantCurricula()->get();
+
+        return Inertia::render('Participant/Edit', [
+            'courses' => $courses,
+            'participant' => $participant,
+            'participantChapters' => $participantChapters,
+            // 'curricula' => $participantcurricula,
+        ]);
     }
 
     /**
