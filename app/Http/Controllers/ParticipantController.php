@@ -89,28 +89,12 @@ class ParticipantController extends Controller
                 // curricula生成
                 if($chapterOrder === 1){
                     // dd($chapterOrder);
-                    $participantChapter->syncCurricula();
+                    $participantChapter->syncCurricula(1);
                     // dd($participantChapter->participantCurricula());
                 }
                 $chapterOrder++;
             }
 
-            // 最初のcurriculumをcurrentにセット
-            // $first = $participantChapter->participantCurricula()
-            //     ->join('curricula', 'participant_curricula.curriculum_id', '=', 'curricula.id')
-            //     ->orderBy('curricula.curriculum_number')
-            //     ->select('participant_curricula.*')
-            //     ->first();
-            // // 最初のcurriculumをcurrentにセット
-            // $first = $participantChapter->participantCurricula()
-            //     ->join('curricula', 'participant_curricula.curriculum_id', '=', 'curricula.id')
-            //     ->orderBy('curricula.curriculum_number')
-            //     ->select('participant_curricula.*')
-            //     ->first();
-
-            // $participantChapter->update([
-            //     'current_participant_curriculum_id' => $first?->id,
-            // ]);
         });
 
         return to_route('index');
@@ -147,6 +131,8 @@ class ParticipantController extends Controller
                         'chapter' => $pc->chapter,
                         'curriculum' => $pcur->curriculum,
                         'courseName' => $pc->chapter->course->name,
+                        'starting_date' => $pcur->starting_date,
+                        'completion_date' => $pcur->completion_date,
                     ];
                 });
             })
@@ -166,7 +152,35 @@ class ParticipantController extends Controller
      */
     public function update(UpdateParticipantRequest $request, Participant $participant)
     {
-        //
+        // dd($request);
+        DB::transaction(function () use ($participant, $request) {
+
+            $current = $participant->participantChapters()
+                ->pluck('chapter_id')
+                ->toArray();
+
+            $new = $request->chapters;
+
+            $add = array_diff($new, $current);
+            $delete = array_diff($current, $new);
+
+            // 追加
+            foreach ($add as $chapterId) {
+                $participant->participantChapters()->create([
+                    'chapter_id' => $chapterId,
+                    'chapter_order' => 0
+                ]);
+            }
+
+            // 削除
+            if ($delete) {
+                $participant->participantChapters()
+                    ->whereIn('chapter_id', $delete)
+                    ->delete();
+            }
+        });
+
+        return redirect()->route('participants.edit', $participant);
     }
 
     /**

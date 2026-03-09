@@ -42,7 +42,7 @@ const removeChapter = (id:number) => {
                   <td class="px-4 py-3">{{c.courseName}}</td>
                   <td class="px-4 py-3">{{c.chapter_number}}</td>
                   <td class="px-4 py-3">{{c.name}}</td>
-                  <td class="px-4 py-3">
+                  <td v-if="!c.isStarting" class="px-4 py-3">
                     <button
                         @click="removeChapter(c.id)" class="text-red-500 hover:text-red-700">
                         ×

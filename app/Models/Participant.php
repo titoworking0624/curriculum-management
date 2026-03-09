@@ -30,22 +30,38 @@ class Participant extends Model
     }
     public function currentCurriculum()
     {
-        $current = $this->participantCurricula()
-            ->whereNull('participant_curricula.completion_date') //カリキュラムが未完了
-            ->whereHas('participantChapter',function($query){
-                $query->whereNull('completion_date') //章未完了
-                    ->whereNotNull('starting_date'); // 開始済み
-            })
-            ->join('curricula','participant_curricula.curriculum_id','=','curricula.id')
-            ->orderBy('curricula.curriculum_number')
+        return $this->participantCurricula()
+            ->whereNull('participant_curricula.completion_date') // カリキュラム未完了
+            // ->whereHas('participantChapter', function ($query) {
+            //     $query->whereNull('participant_chapters.completion_date')   // 章未完了
+            //         ->whereNotNull('participant_chapters.starting_date');   // 開始済み
+            // })
             ->with([
                 'curriculum',
-                'participantChapter.chapter.course'
+                'participantChapter.chapter.course',
             ])
-            ->select('participant_curricula.*')
+            // ->whereHas('curriculum')
+            // ->orderBy(
+            //     Curriculum::select('curriculum_number')
+            //         ->whereColumn('curricula.id', 'participant_curricula.curriculum_id')
+            // )
             ->first();
+        // $current = $this->participantCurricula()
+        //     ->whereNull('participant_curricula.completion_date') //カリキュラムが未完了
+        //     ->whereHas('participantChapter',function($query){
+        //         $query->whereNull('completion_date') //章未完了
+        //             ->whereNotNull('starting_date'); // 開始済み
+        //     })
+        //     ->join('curricula','participant_curricula.curriculum_id','=','curricula.id')
+        //     ->orderBy('curricula.curriculum_number')
+        //     ->with([
+        //         'curriculum',
+        //         'participantChapter.chapter.course'
+        //     ])
+        //     ->select('participant_curricula.*')
+        //     ->first();
 
-        return $current;
+        // return $current;
     }
     // public function getCurrentCurriculumAttribute(){
     //     $current = $this->currentCurriculum();

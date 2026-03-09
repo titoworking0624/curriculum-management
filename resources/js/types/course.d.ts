@@ -29,6 +29,7 @@ export type Participant = {
 
 export type ChapterWithCourseName = Chapter & {
     courseName: string;
+    isStarting?:boolean
 };
 
 export type ParticipantChapter = {
@@ -48,5 +49,6 @@ export type CurriculumWithCourseName = {
     chapter:Chapter
     curriculum: Curriculum
     courseName:string
-
+    starting_date:date
+    completion_date:date
 }

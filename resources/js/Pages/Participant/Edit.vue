@@ -20,17 +20,22 @@ const props = defineProps<{
 }>();
 
 const form = useForm({
-    // chapter_id: props.chapter?.id ?? 0,
     chapters:[] as number[],
     name: props.participant.name,
 });
-form.chapters = props.participantChapters.map(pc => pc.chapter.id)
+const initialChapterIds = new Set(
+  props.participantChapters.map(pc => pc.chapter.id)
+)
+const chapterIds = props.participantChapters.map(pc => pc.chapter.id)
+
+form.chapters = [...new Set(chapterIds)]
 
 const allChapters = computed<ChapterWithCourseName[]>(() =>
   props.courses.flatMap(course =>
     course.chapters.map(ch => ({
       ...ch,
-      courseName: course.name
+      courseName: course.name,
+      isStarting: initialChapterIds.has(ch.id)
     }))
   )
 )
@@ -39,11 +44,6 @@ const selectedChapters = computed(() =>
   allChapters.value.filter(ch => form.chapters.includes(ch.id))
 )
 
-const addChapter = (chapterId:number) => {
-  if(!form.chapters.includes(chapterId)){
-    form.chapters.push(chapterId)
-  }
-}
 const removeChapter = (chapterId:number) => {
   form.chapters = form.chapters.filter(id => id !== chapterId)
 }
@@ -69,6 +69,7 @@ const handleSelectCourse = (id: number) => {
         // console.log(chapterId)
         if(!selectedChapters.value.some(c => c.id === chapter.id)){
             selectedChapters.value.push(chapter)
+            form.chapters.push(chapter.id)
         }
     }
 }
@@ -85,11 +86,15 @@ watch(selectedCourseId, (id) => {
     selectedCourses.value = props.courses
   }
 })
+// watch(selectedChapters, (ch) => {
+//   form.chapters.push(ch.id)
+// })
 
 const handleSelectChapter = (chapter: ChapterWithCourseName) => {
 
     if(!selectedChapters.value.some(c => c.id === chapter.id)){
         selectedChapters.value.push(chapter)
+        form.chapters.push(chapter.id)
     }
 }
 // const removeChapter = (id: number) => {
@@ -97,7 +102,7 @@ const handleSelectChapter = (chapter: ChapterWithCourseName) => {
 // }
 const storeParticipant = () => {
     // form.chapters = selectedChapters
-    form.post('/participants')
+    form.put(route('participants.update',{participant:props.participant.id}))
 }
 
 </script>
@@ -186,7 +191,7 @@ const storeParticipant = () => {
                 </div>
             </div>
             <div class="w-full p-2">
-                <SubmitButton class="mx-auto mt-8">登録する</SubmitButton>
+                <SubmitButton class="mx-auto mt-8">更新する</SubmitButton>
             </div>
         </form>
     </FormLayout>

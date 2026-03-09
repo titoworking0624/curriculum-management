@@ -31,25 +31,27 @@ const removeChapter = (id:number) => {
         <table class="table-auto w-full text-left whitespace-no-wrap">
           <thead>
             <tr>
-              <th v-if="show" class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">コース名</th>
-              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">章番号</th>
-              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">章名</th>
+              <th v-if="show" class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">コード</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">カリキュラム名</th>
-              <th v-if="show" class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">編集</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">開始日</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">完了日</th>
+              <!-- <th v-if="show" class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">編集</th> -->
             </tr>
           </thead>
           <tbody>
               <tr v-for="c in curricula" :key="c.curriculum.id">
-                  <td class="px-4 py-3">{{c.courseName}}</td>
-                  <td class="px-4 py-3">{{c.chapter.chapter_number}}</td>
-                  <td class="px-4 py-3">{{c.chapter.name}}</td>
+                  <td class="px-4 py-3">{{c.curriculum.curriculum_code}}</td>
                   <td class="px-4 py-3">{{c.curriculum.name}}</td>
-                  <td class="px-4 py-3">
-                    <button
+                  <td v-if="c.starting_date" class="px-4 py-3">{{c.starting_date}}</td>
+                  <td v-else class="px-4 py-3 text-gray-400">開始前</td>
+                  <td v-if="c.completion_date" class="px-4 py-3">{{c.completion_date}}</td>
+                  <td v-else class="px-4 py-3 text-gray-400">未完了</td>
+                  <!-- <td class="px-4 py-3">
+                    <button v-if="!(c.starting_date)"
                         @click="removeChapter(c.curriculum.id)" class="text-red-500 hover:text-red-700">
                         ×
                     </button>
-                    </td>
+                    </td> -->
               </tr>
           </tbody>
         </table>

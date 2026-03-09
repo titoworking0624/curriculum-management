@@ -10,12 +10,22 @@ import ChapterList from '@/Layouts/Chapter/ChapterList.vue';
 import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
 import { Chapter, Course, Curriculum, Participant } from '@/types/course';
-import { useForm } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
+import axios from 'axios';
 
 const props = defineProps<{
     participant:Participant,
     curriculum:Curriculum,
 }>()
+
+const completeCurriculum = () => {
+    router.patch(route('complete',{participant:props.participant.id}), {}, {
+        onSuccess: () => {
+            router.reload({ only: ['curriculum'] })
+        }
+    })
+
+}
 
 const title = props.participant.name + " - " + "現在の課題"
 const subtitle = props.participant.name
@@ -28,7 +38,7 @@ const subtitle = props.participant.name
             <div class="relative flex w-full">
                 <SubTitle :value="subtitle" />
                 <div class="w-1/2 mt-2 flex">
-                    <SecondaryButton class="ml-auto" :href="route('curricula.edit',{curriculum:props.curriculum.id})">編集する</SecondaryButton>
+                    <SecondaryButton class="ml-auto" :href="route('participants.edit',{participant:props.participant.id})">編集する</SecondaryButton>
                 </div>
             </div>
           </div>
@@ -61,7 +71,7 @@ const subtitle = props.participant.name
           </div>
           <div class="p-2 w-full">
             <div class="relative flex">
-                <SubmitButton class="ml-auto">提出完了</SubmitButton>
+                <PrimaryButton @click="completeCurriculum" class="ml-auto">提出完了</PrimaryButton>
             </div>
           </div>
         </div>

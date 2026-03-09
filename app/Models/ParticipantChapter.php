@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -33,33 +34,43 @@ class ParticipantChapter extends Model
     {
         return $this->hasMany(ParticipantCurriculum::class);
     }
-    public function currentParticipantCurriculum()
+    // public function currentParticipantCurriculum()
+    // {
+    //     return $this->belongsTo(
+    //         ParticipantCurriculum::class,
+    //         'current_participant_curriculum_id'
+    //     );
+    // }
+    public function syncCurricula(int $number)
     {
-        return $this->belongsTo(
-            ParticipantCurriculum::class,
-            'current_participant_curriculum_id'
-        );
-    }
-    public function syncCurricula()
-    {
-        $curricula = $this->chapter->curricula;
+        $curriculum = $this->chapter->curricula->where('curriculum_number', $number)->firstOrFail();
 
         // dd($curricula);
-        foreach ($curricula as $curriculum) {
-            // dd($curriculum);
-            $this->participantCurricula()->create([
-                'curriculum_id' => $curriculum->id,
-                'starting_date' => $curriculum->curriculum_number === 1 ? now() : null,
-            ]);
-        }
+        // dd($this->id);
+        $this->participantCurricula()->firstOrCreate(
+            [
+                'curriculum_id' => $curriculum->id
+            ],
+            [
+                'starting_date' => now(),
+            ]
+        );
+
     }
-    // /**
-    //  * 章完了判定
-    //  */
-    // public function isCompleted(): bool
-    // {
-    //     return $this->participantCurricula()
-    //         ->where('completion_date', null)
-    //         ->doesntExist();
-    // }
+    public function scopeIncomplete(Builder $query)
+    {
+        return $query->whereNull('completion_date');
+    }
+
+    /**
+     * 章完了判定
+     */
+    public function isCompleted(): bool
+    {
+        return $this->participantCurricula()
+            ->where('completion_date', null)
+            ->doesntExist();
+    }
+
+
 }
