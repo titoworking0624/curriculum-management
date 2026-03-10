@@ -8,14 +8,14 @@ import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
 import ParticipantChapter from '@/Layouts/Participant/ParticipantChapter.vue';
 import ParticipantCurricula from '@/Layouts/Participant/ParticipantCurricula.vue';
-import { Chapter, ChapterWithCourseName, Course, Curriculum, CurriculumWithCourseName, Participant, ParticipantWithRelations, ParticipantChapter as PC} from '@/types/course';
+import { Chapter, ChapterWithCourseName, Course, Curriculum, CurriculumWithCourseName, Participant, ParticipantChapter as PC} from '@/types/course';
 import { useForm } from '@inertiajs/vue3';
 import { computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
     courses: Course[];
-    participant:ParticipantWithRelations,
-    // participantChapters: CurriculumWithCourseName[]
+    participant:Participant,
+    participantChapters: CurriculumWithCourseName[]
     errors: Object;
 }>();
 
@@ -24,10 +24,9 @@ const form = useForm({
     name: props.participant.name,
 });
 const initialChapterIds = new Set(
-  props.participant.participant_curricula.flatMap(pc => pc.participant_chapter.chapter.id)
-//   props.participantChapters.map(pc => pc.chapter.id)
+  props.participantChapters.map(pc => pc.chapter.id)
 )
-const chapterIds = props.participant.participant_chapters.map(pc => pc.chapter.id)
+const chapterIds = props.participantChapters.map(pc => pc.chapter.id)
 
 form.chapters = [...new Set(chapterIds)]
 
@@ -37,7 +36,7 @@ const allChapters = computed<ChapterWithCourseName[]>(() =>
       ...ch,
       courseName: course.name,
       isStarting: initialChapterIds.has(ch.id),
-      completion_date: props.participant.participant_chapters.find(c => c.chapter.id == ch.id)?.completion_date
+      completion_date: props.participantChapters.find(c => c.chapter.id == ch.id)?.completion_date
     }))
   )
 )
@@ -50,7 +49,7 @@ const removeChapter = (chapterId:number) => {
   form.chapters = form.chapters.filter(id => id !== chapterId)
 }
 
-// const selectedCurricula = ref<CurriculumWithCourseName[]>(props.participantChapters)
+const selectedCurricula = ref<CurriculumWithCourseName[]>(props.participantChapters)
 
 // const addCourses = props.courses.find(c => c.id === designCourseId)
 
@@ -139,7 +138,7 @@ const storeParticipant = () => {
                     class="text-sm leading-7 text-gray-600"
                     value="受講カリキュラム"
                 />
-                <ParticipantCurricula :curricula="props.participant.participant_curricula" @removeChapter="removeChapter"
+                <ParticipantCurricula :curricula="selectedCurricula" @removeChapter="removeChapter"
                     class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200" />
             </div>
         </div>

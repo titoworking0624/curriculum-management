@@ -39,6 +39,33 @@ class ParticipantCurriculum extends Model
     {
         return $query->whereNotNull('completion_date');
     }
+    public function nextCurriculum()
+    {
+        return Curriculum::where('chapter_id', $this->curriculum->chapter_id)
+            ->where('curriculum_number', '>', $this->curriculum->curriculum_number)
+            ->orderBy('curriculum_number')
+            ->first();
+    }
+    public function createNext()
+    {
+        $next = $this->nextCurriculum();
+
+        if (!$next) {
+            return null;
+        }
+
+        return self::create([
+            'participant_chapter_id' => $this->participant_chapter_id,
+            'curriculum_id' => $next->id,
+            'starting_date' => now(),
+        ]);
+    }
+    public function isLastCurriculum(): bool
+    {
+        return !Curriculum::where('chapter_id', $this->curriculum->chapter_id)
+            ->where('curriculum_number', '>', $this->curriculum->curriculum_number)
+            ->exists();
+    }
 
 
 }

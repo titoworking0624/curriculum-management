@@ -16,36 +16,67 @@ class ParticipantController extends Controller
      */
     public function index()
     {
-        $sub = DB::table('participant_curricula as pc')
-            ->join('participant_chapters as pch', 'pc.participant_chapter_id', '=', 'pch.id')
-            ->join('curricula as c', 'pc.curriculum_id', '=', 'c.id')
-            ->whereNull('pc.completion_date')
-            ->whereNull('pch.completion_date')
-            ->whereNotNull('pch.starting_date')
-            ->selectRaw('
-        pch.participant_id,
-        pc.starting_date,
-        c.curriculum_code as curriculum_code,
-        c.name as curriculum_name,
-        ROW_NUMBER() OVER (
-            PARTITION BY pch.participant_id
-            ORDER BY c.curriculum_number
-        ) as rn
-    ');
+        $sub = DB::table('participants as p')
+                    ->join('participant_chapters as pch', 'p.id', '=','pch.participant_id')
+                    ->join('participant_curricula as pcu','pch.id','=','pcu.participant_chapter_id')
+                    ->latest('pcu.starting_date')
+                    ->distinct('p.name')
+                    ->selectRaw('
+                        p.id,
+                        p.name,
+                        pcu.curriculum_id as curriculum_id,
+                        pcu.starting_date as starting_date,
+                        pcu.completion_date as completion_date,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY p.id
+                            ORDER BY pcu.starting_date DESC
+                        ) as rn
+                    ');
 
-        $participants = DB::query()
-            ->fromSub($sub, 't')
-            ->where('t.rn', 1)
-            ->rightJoin('participants as p', 'p.id', '=', 't.participant_id')
-            ->select([
-                'p.id as pa_id',
-                'p.name as pa_name',
-                't.curriculum_code as cu_code',
-                't.curriculum_name as cu_name',
-                't.starting_date as st_date',
-            ])
-            ->orderBy('p.name')
-            ->get();
+            $participants = DB::query()
+                ->fromSub($sub, 't')
+                ->where('t.rn', 1)
+                ->rightJoin('curricula as c', 'c.id', '=', 'curriculum_id')
+                ->select([
+                    't.id as pa_id',
+                    't.name as pa_name',
+                    'c.curriculum_code as cu_code',
+                    'c.name as cu_name',
+                    't.starting_date as st_date',
+                    't.completion_date as co_date',
+                ])
+                ->latest('st_date')
+                ->get();
+
+        //     $sub = DB::table('participant_curricula as pc')
+        //         ->join('participant_chapters as pch', 'pc.participant_chapter_id', '=', 'pch.id')
+        //         ->join('curricula as c', 'pc.curriculum_id', '=', 'c.id')
+        //         ->whereNull('pc.completion_date')
+        //         ->whereNull('pch.completion_date')
+        //         ->whereNotNull('pch.starting_date')
+        //         ->selectRaw('
+        //     pch.participant_id,
+        //     pc.starting_date,
+        //     c.curriculum_code as curriculum_code,
+        //     c.name as curriculum_name,
+        //     ROW_NUMBER() OVER (
+        //         PARTITION BY pch.participant_id
+        //         ORDER BY c.curriculum_number
+        //     ) as rn
+        // ')
+        //     $participants = DB::query()
+        //         ->fromSub($sub, 't')
+        //         ->where('t.rn', 1)
+        //         ->rightJoin('participants as p', 'p.id', '=', 't.participant_id')
+        //         ->select([
+        //             'p.id as pa_id',
+        //             'p.name as pa_name',
+        //             't.curriculum_code as cu_code',
+        //             't.curriculum_name as cu_name',
+        //             't.starting_date as st_date',
+        //         ])
+        //         ->orderBy('p.name')
+        //         ->get();
 
         return Inertia::render('Participant/Index',[
             'participants' => $participants,
@@ -105,13 +136,23 @@ class ParticipantController extends Controller
      */
     public function show(Participant $participant)
     {
-        $curriculum = $participant->currentCurriculum()->curriculum;
+        $curriculum = $participant->currentCurriculum()?->curriculum;
+
+        $nextCurriculum = $participant?->nextCurrentCurriculum();
+
+        $prevCurriculum = $participant->prevCurriculum()?->curriculum;
+
+        // if(!$curriculum){
+
+        // }
         // dd($participant->currentCurriculum());
         // dd($curriculum->checklist);
 
         return Inertia::render('Participant/Show',[
             'participant' => $participant,
             'curriculum' => $curriculum,
+            'nextCurriculum' => $nextCurriculum,
+            'prevCurriculum' => $prevCurriculum,
         ]);
     }
 
@@ -137,7 +178,22 @@ class ParticipantController extends Controller
                 });
             })
             ;
-        // $participantCurricula = $participantChapters->participantCurricula()->get();
+        // $participantCurricula = $participant->participantCurricula()
+        //     ->with('participantChapter.chapter.course','curriculum')
+        //     ->get()
+        //     ->map(fn ($pc) => [
+        //             'chapter' => $pc->participantChapter->chapter,
+        //             'curriculum' => $pc->curriculum,
+        //             'courseName' => $pc->participantChapter->chapter->course->name,
+        //             'starting_date' => $pc->starting_date,
+        //             'completion_date' => $pc->completion_date,
+        //     ]);
+
+        $participant->load([
+            'participantCurricula.curriculum',
+            'participantCurricula.participantChapter.chapter',
+            'participantChapters.chapter.course'
+        ]);
 
         return Inertia::render('Participant/Edit', [
             'courses' => $courses,

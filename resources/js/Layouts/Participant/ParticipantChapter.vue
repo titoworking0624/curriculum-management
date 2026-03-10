@@ -34,6 +34,7 @@ const removeChapter = (id:number) => {
               <th v-if="show" class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">コース名</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">章番号</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">章名</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">完了日</th>
               <th v-if="show" class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">編集</th>
             </tr>
           </thead>
@@ -42,6 +43,7 @@ const removeChapter = (id:number) => {
                   <td class="px-4 py-3">{{c.courseName}}</td>
                   <td class="px-4 py-3">{{c.chapter_number}}</td>
                   <td class="px-4 py-3">{{c.name}}</td>
+                  <td class="px-4 py-3">{{c.completion_date}}</td>
                   <td v-if="!c.isStarting" class="px-4 py-3">
                     <button
                         @click="removeChapter(c.id)" class="text-red-500 hover:text-red-700">

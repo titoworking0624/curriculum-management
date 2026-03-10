@@ -26,12 +26,43 @@ defineProps({
           </thead>
           <tbody>
               <tr v-for="p in participants" :key="p.id">
-                  <td class="px-4 py-3"><PrimaryButton :href="route('participants.show',{participant:p.pa_id})">確認</PrimaryButton></td>
-                  <td class="px-4 py-3">{{p.pa_name}}</td>
-                  <td class="px-4 py-3">{{p.cu_code}}</td>
-                  <td class="px-4 py-3">{{p.cu_name}}</td>
-                  <td class="px-4 py-3">{{p.st_date}}</td>
-                  <td class="px-4 py-3"><SecondaryButton :href="route('participants.edit',{participant:p.pa_id})">編集</SecondaryButton></td>
+                <template v-if="!p.co_date">
+                  <td class="px-4 py-3">
+                      <PrimaryButton :href="route('participants.show',{participant:p.pa_id})">確認</PrimaryButton></td>
+                      <td class="px-4 py-3">{{p.pa_name}}</td>
+                      <td class="px-4 py-3">{{p.cu_code}}</td>
+                      <td class="px-4 py-3">{{p.cu_name}}</td>
+                      <td class="px-4 py-3">{{p.st_date}}</td>
+                      <td class="px-4 py-3"><SecondaryButton :href="route('participants.edit',{participant:p.pa_id})">編集</SecondaryButton></td>
+                </template>
+              </tr>
+          </tbody>
+        </table>
+        <div class="flex flex-col text-center w-full my-6">
+            <h2 class="mx-auto sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">課題未送信</h2>
+        </div>
+        <table class="table-auto w-full text-left whitespace-no-wrap">
+          <thead>
+            <tr>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">提出確認</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">受講者</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">課題番号</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">課題名</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">課題完了日</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">編集</th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr v-for="p in participants" :key="p.id">
+                <template v-if="p.co_date">
+                    <td class="px-4 py-3">
+                      <PrimaryButton :href="route('participants.show',{participant:p.pa_id})">確認</PrimaryButton></td>
+                      <td class="px-4 py-3">{{p.pa_name}}</td>
+                      <td class="px-4 py-3">{{p.cu_code}}</td>
+                      <td class="px-4 py-3">{{p.cu_name}}</td>
+                      <td class="px-4 py-3">{{p.co_date}}</td>
+                      <td class="px-4 py-3"><SecondaryButton :href="route('participants.edit',{participant:p.pa_id})">編集</SecondaryButton></td>
+                </template>
               </tr>
           </tbody>
         </table>

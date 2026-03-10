@@ -10,7 +10,7 @@ import TextInput from '@/Components/TextInput.vue';
 import ChapterList from '@/Layouts/Chapter/ChapterList.vue';
 import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
-import { Curriculum, Participant } from '@/types/course';
+import { Chapter, Course, Curriculum, Participant } from '@/types/course';
 import { router, useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 
@@ -20,7 +20,6 @@ const props =
         participant:Participant;
         curriculum:Curriculum | null;
         nextCurriculum:Curriculum | null;
-        prevCurriculum:Curriculum | null;
     }>()
     // ,
     // {
@@ -78,7 +77,6 @@ const subtitle = props.participant.name
                 </div>
             </div>
           </div>
-          <template v-if="curriculum">
           <div class="p-2">
             <div class="relative">
                 <InputLabel class="leading-7 text-sm text-gray-600" value="カリキュラムコード" />
@@ -118,27 +116,14 @@ const subtitle = props.participant.name
                 </div>
             </div>
           </div>
-        </template>
-        <template v-else>
-        <div class="flex flex-col text-center w-full my-6">
-            <h2 class="mx-auto sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">課題未送信</h2>
-            <p v-if="nextCurriculum" class="mx-auto sm:text-4xl text-3xl font-medium mt-2 text-gray-900">次回課題：{{ nextCurriculum.curriculum_code }}:{{ nextCurriculum.name }}</p>
-        </div>
-
-
-        </template>
-
           <div class="p-2 w-full">
             <div class="relative flex justify-between">
-                <div class="flex flex-col">
-                    <span v-if="prevCurriculum">{{ prevCurriculum.curriculum_code }}:{{ prevCurriculum.name }}</span>
-                    <CancelButton @click="cancelCurriculum" class="mr-auto">提出完了キャンセル</CancelButton>
-                </div>
+                <CancelButton @click="cancelCurriculum" class="mr-auto">提出完了キャンセル</CancelButton>
                 <PrimaryButton v-if="curriculum" @click="completeCurriculum" class="ml-auto">提出完了</PrimaryButton>
-                <div v-else class="flex flex-col">
-                    <span v-if="nextCurriculum">{{ nextCurriculum.curriculum_code }}:{{ nextCurriculum.name }}</span>
+                <span v-else class="flex">
+                    <div v-if="nextCurriculum" class="mr-2">{{ nextCurriculum.curriculum_code }}:{{ nextCurriculum.name }}</div>
                     <PrimaryButton  @click="startCurriculum" class="ml-auto">課題スタート</PrimaryButton>
-                </div>
+                </span>
             </div>
           </div>
         </div>

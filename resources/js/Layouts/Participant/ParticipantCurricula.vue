@@ -4,12 +4,12 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import HeadLayout from '@/Layouts/HeadLayout.vue';
 import ListLayout from '@/Layouts/ListLayout.vue';
-import { Chapter, ChapterWithCourseName, CurriculumWithCourseName } from '@/types/course';
+import { Chapter, ChapterWithCourseName, CurriculumWithCourseName, ParticipantCurriculum } from '@/types/course';
 import { Head } from '@inertiajs/vue3';
 
 withDefaults(
     defineProps<{
-        curricula:CurriculumWithCourseName[],
+        curricula:ParticipantCurriculum[],
         show?: boolean;
     }>(),
     {
