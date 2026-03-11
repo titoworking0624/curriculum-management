@@ -9,10 +9,14 @@ use App\Models\ParticipantCurriculum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * 受講者課題コントローラー
+ */
+
 class ParticipantCurriculumController extends Controller
 {
     /**
-     * 次の課題選択
+     * 課題完了処理
      */
     public function complete(Participant $participant)
     {
@@ -33,22 +37,29 @@ class ParticipantCurriculumController extends Controller
                 ->where('curriculum_number', $current->curriculum->curriculum_number + 1)
                 ->first();
 
-            if ($next) {
-
-                ParticipantCurriculum::create([
-                    'participant_chapter_id' => $current->participant_chapter_id,
-                    'curriculum_id' => $next->id,
-                    'starting_date' => now()
-                ]);
-            }else{
+            if(!$next){
                 // 次の curriculum がない = chapter 完了
                 $this->completeChapter($current->participant_chapter_id);
             }
+            // if ($next) {
+
+                // ParticipantCurriculum::create([
+                //     'participant_chapter_id' => $current->participant_chapter_id,
+                //     'curriculum_id' => $next->id,
+                //     'starting_date' => now()
+                // ]);
+            // }else{
+            //     // 次の curriculum がない = chapter 完了
+            //     $this->completeChapter($current->participant_chapter_id);
+            // }
 
             return response()->json(['success' => true]);
         });
     }
-    public function completeChapter($participantChapterId)
+    /**
+     * 章(チャプター)完了処理
+     */
+    private function completeChapter($participantChapterId)
     {
         $participantChapter = ParticipantChapter::find($participantChapterId);
 
@@ -71,20 +82,23 @@ class ParticipantCurriculumController extends Controller
             'starting_date' => now()
         ]);
 
-        // その chapter の curriculum1開始
-        $firstCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
-            ->where('curriculum_number', 1)
-            ->first();
+        // // その chapter の curriculum1開始
+        // $firstCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
+        //     ->where('curriculum_number', 1)
+        //     ->first();
 
-        // id(!$firstCurriculum){
-        //     retr
-        // }
-        ParticipantCurriculum::create([
-            'participant_chapter_id' => $nextChapter->id,
-            'curriculum_id' => $firstCurriculum->id,
-            'starting_date' => now()
-        ]);
+        // // id(!$firstCurriculum){
+        // //     retr
+        // // }
+        // ParticipantCurriculum::create([
+        //     'participant_chapter_id' => $nextChapter->id,
+        //     'curriculum_id' => $firstCurriculum->id,
+        //     'starting_date' => now()
+        // ]);
     }
+    /**
+     * 課題完了キャンセル処理
+     */
     public function cancelComplete(Participant $participant)
     {
         DB::transaction(function () use ($participant) {
@@ -92,10 +106,7 @@ class ParticipantCurriculumController extends Controller
             $current = $participant->currentCurriculum();
 
             // 直前に完了した curriculum
-            $prev = $participant->participantCurricula()
-                ->WhereNotNull('participant_curricula.completion_date')
-                ->latest('id')
-                ->first();
+            $prev = $participant->prevCurriculum();
 
             if(!$prev){
                 return;
@@ -123,33 +134,27 @@ class ParticipantCurriculumController extends Controller
             });
         return response()->json(['success' => true]);
     }
+    /**
+     * 課題スタート処理
+     */
     public function startCurriculum(Participant $participant)
     {
         DB::transaction(function() use ($participant){
-            $nextChapter = $participant->participantChapters()
-                ->whereNull('participant_chapters.completion_date')
-                ->orderBy('chapter_order')
-                ->first();
-            // dd($next);
-            if(!$nextChapter){
-                return;
-            }
-            $nextChapter->update([
-                'starting_date' => now()
-            ]);
-            // その chapter の curriculum1開始
-            $firstCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
-                ->where('curriculum_number', 1)
-                ->first();
+            if($participant->participantCurricula()->isLastCurriculum()){
+                $participant->startCurriculum();
+            }else{
+                $current = $participant->currentCurriculum();
 
-            // id(!$firstCurriculum){
-            //     retr
-            // }
-            ParticipantCurriculum::create([
-                'participant_chapter_id' => $nextChapter->id,
-                'curriculum_id' => $firstCurriculum->id,
-                'starting_date' => now()
-            ]);
+                $next = Curriculum::where('chapter_id', $current->curriculum->chapter_id)
+                    ->where('curriculum_number', $current->curriculum->curriculum_number + 1)
+                    ->first();
+
+                ParticipantCurriculum::create([
+                    'participant_chapter_id' => $current->participant_chapter_id,
+                    'curriculum_id' => $next->id,
+                    'starting_date' => now()
+                ]);
+            }
         });
         return response()->json(['success' => true]);
     }

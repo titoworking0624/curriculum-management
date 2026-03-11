@@ -11,7 +11,7 @@ use Inertia\Inertia;
 class CourseController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * コース一覧画面
      */
     public function index()
     {
@@ -23,7 +23,7 @@ class CourseController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * コース作成画面
      */
     public function create()
     {
@@ -31,7 +31,7 @@ class CourseController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * コース作成処理
      */
     public function store(StoreCourseRequest $request)
     {
@@ -46,7 +46,7 @@ class CourseController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * コース内章(チャプター)一覧画面
      */
     public function show(Course $course)
     {
@@ -60,7 +60,7 @@ class CourseController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * コース編集画面
      */
     public function edit(Course $course)
     {
@@ -70,7 +70,7 @@ class CourseController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * コース編集処理
      */
     public function update(UpdateCourseRequest $request, Course $course)
     {

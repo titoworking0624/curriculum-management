@@ -30,20 +30,6 @@ class ParticipantCurriculaSeeder extends Seeder
                 'starting_date' => now(),
                 'completion_date' => null,
             ],
-            [
-                'id' => 3,
-                'participant_chapter_id' => 2,
-                'curriculum_id' => 3,
-                'starting_date' => null,
-                'completion_date' => null,
-            ],
-            [
-                'id' => 4,
-                'participant_chapter_id' => 2,
-                'curriculum_id' => 4,
-                'starting_date' => null,
-                'completion_date' => null,
-            ],
         ]);
         // ParticipantChapter::findOrFail(2)->update([
         //     'current_participant_curriculum_id' => 2,

@@ -21,13 +21,13 @@ class ChapterController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * 章(チャプター)作成画面
      */
     public function create(Request $request)
     {
-        // dd($request->course_id);
+        // 章一覧(courses.show)から選択した際のコース
         $course = Course::find($request->query('course_id'));
-        // dd($courseId);
+        // コース一覧
         $courses = Course::with('chapters')->get();
 
         return Inertia::render('Chapter/Create', [
@@ -37,7 +37,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * 章(チャプター)作成処理
      */
     public function store(StoreChapterRequest $request)
     {
@@ -45,6 +45,7 @@ class ChapterController extends Controller
         // dd($request);
 
         try {
+            // 章登録
             $chapter = Chapter::create([
                 'chapter_number' => $request->chapter_number,
                 'course_id' => $request->course_id,
@@ -62,13 +63,13 @@ class ChapterController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * 章(チャプター)内チャプター一覧画面
      */
     public function show(Chapter $chapter)
     {
-        // dd($course);
+        // カリキュラム一覧取得
         $curricula = $chapter->curricula()->get();
-        // dd($chapters);
+        // コース名取得のため
         $course = $chapter->course()->first();
         // dd($course);
         return Inertia::render('Chapter/Show', [
@@ -79,7 +80,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * 章(チャプター)編集画面
      */
     public function edit(Chapter $chapter)
     {
@@ -94,7 +95,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * 章(チャプター)編集処理
      */
     public function update(UpdateChapterRequest $request, Chapter $chapter)
     {

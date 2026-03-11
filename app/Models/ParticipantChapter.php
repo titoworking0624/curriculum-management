@@ -17,10 +17,10 @@ class ParticipantChapter extends Model
         'starting_date',
         'completion_date',
     ];
-    // protected $casts = [
-    //     'starting_date' => 'date',
-    //     'completion_date' => 'date',
-    // ];
+    protected $casts = [
+        'starting_date' => 'date:Y-m-d',
+        'completion_date' => 'date:Y-m-d',
+    ];
 
     public function participant()
     {

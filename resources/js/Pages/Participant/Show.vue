@@ -44,21 +44,21 @@ const props =
 const completeCurriculum = () => {
     router.patch(route('complete',{participant:props.participant.id}), {}, {
         onSuccess: () => {
-            router.reload({ only: ['curriculum'] })
+            router.reload({ only: ['curriculum','prevCurriculum','nextCurriculum'] })
         }
     })
 }
 const cancelCurriculum = () => {
     router.patch(route('cancelComplete',{participant:props.participant.id}), {}, {
         onSuccess: () => {
-            router.reload({ only: ['curriculum'] })
+            router.reload({ only: ['curriculum','prevCurriculum','nextCurriculum'] })
         }
     })
 }
 const startCurriculum = () => {
     router.patch(route('startCurriculum',{participant:props.participant.id}), {}, {
         onSuccess: () => {
-            router.reload({ only: ['curriculum'] })
+            router.reload({ only: ['curriculum','prevCurriculum','nextCurriculum'] })
         }
     })
 }
@@ -130,12 +130,15 @@ const subtitle = props.participant.name
 
           <div class="p-2 w-full">
             <div class="relative flex justify-between">
-                <div class="flex flex-col">
-                    <span v-if="prevCurriculum">{{ prevCurriculum.curriculum_code }}:{{ prevCurriculum.name }}</span>
+                <div v-if="prevCurriculum" class="flex flex-col mr-auto">
+                    <span>{{ prevCurriculum.curriculum_code }}:{{ prevCurriculum.name }}</span>
                     <CancelButton @click="cancelCurriculum" class="mr-auto">提出完了キャンセル</CancelButton>
                 </div>
-                <PrimaryButton v-if="curriculum" @click="completeCurriculum" class="ml-auto">提出完了</PrimaryButton>
-                <div v-else class="flex flex-col">
+                <div v-if="curriculum" class="flex flex-col ml-auto">
+                    <span>{{ curriculum.curriculum_code }}:{{ curriculum.name }}</span>
+                    <PrimaryButton @click="completeCurriculum" class="ml-auto">提出完了</PrimaryButton>
+                </div>
+                <div v-else class="flex flex-col ml-auto">
                     <span v-if="nextCurriculum">{{ nextCurriculum.curriculum_code }}:{{ nextCurriculum.name }}</span>
                     <PrimaryButton  @click="startCurriculum" class="ml-auto">課題スタート</PrimaryButton>
                 </div>

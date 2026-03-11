@@ -11,6 +11,7 @@ import FormLayout from '@/Layouts/FormLayout].vue';
 import { Chapter, Course, Curriculum } from '@/types/course';
 import { useForm } from '@inertiajs/vue3';
 import { nl2br } from "@/common";
+import CopyButton from '@/Components/CopyButton.vue';
 
 const props = defineProps<{
     curriculum:Curriculum,
@@ -61,7 +62,10 @@ const subtitle = props.course.name + "　" + props.chapter.name
           </div>
           <div class="p-2 w-full">
             <div class="relative">
-                <InputLabel class="leading-7 text-sm text-gray-600" value="内容"/>
+                <div class="flex h-10">
+                    <InputLabel class="leading-7 text-sm text-gray-600 mt-auto" value="内容"/>
+                    <CopyButton v-if="curriculum" :text="curriculum.content" class="ml-auto mt-1 mr-4">コピー</CopyButton>
+                </div>
                 <div class="h-32 w-full resize-none rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-6 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 whitespace-pre-line">{{ curriculum.content }}</div>
             </div>
           </div>

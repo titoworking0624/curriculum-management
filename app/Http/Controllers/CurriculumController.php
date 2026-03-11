@@ -22,12 +22,10 @@ class CurriculumController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * カリキュラム作成画面
      */
     public function create(Request $request)
     {
-        // dd($request->chapter_id);
-        // dd($request->course_id);
         $chapter = Chapter::find($request->query('chapter_id'));
         // dd($chapter);
         $courses = Course::with('chapters.curricula')->get();
@@ -40,7 +38,7 @@ class CurriculumController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * カリキュラム作成処理
      */
     public function store(StoreCurriculumRequest $request)
     {
@@ -75,7 +73,7 @@ class CurriculumController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * カリキュラム詳細画面
      */
     public function show(Curriculum $curriculum)
     {
@@ -92,7 +90,7 @@ class CurriculumController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * カリキュラム編集画面
      */
     public function edit(Curriculum $curriculum)
     {
@@ -107,7 +105,7 @@ class CurriculumController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * カリキュラム編集処理
      */
     public function update(UpdateCurriculumRequest $request, Curriculum $curriculum)
     {

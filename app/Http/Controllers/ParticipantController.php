@@ -5,20 +5,25 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreParticipantRequest;
 use App\Http\Requests\UpdateParticipantRequest;
 use App\Models\Course;
+use App\Models\Curriculum;
 use App\Models\Participant;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
+/**
+ * 受講者コントローラー
+ */
 class ParticipantController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * 受講者一覧画面
      */
     public function index()
     {
+        // サブクエリ(後でスコープ化)
         $sub = DB::table('participants as p')
-                    ->join('participant_chapters as pch', 'p.id', '=','pch.participant_id')
-                    ->join('participant_curricula as pcu','pch.id','=','pcu.participant_chapter_id')
+                    ->leftjoin('participant_chapters as pch', 'p.id', '=','pch.participant_id')
+                    ->leftjoin('participant_curricula as pcu','pch.id','=','pcu.participant_chapter_id')
                     ->latest('pcu.starting_date')
                     ->distinct('p.name')
                     ->selectRaw('
@@ -33,58 +38,36 @@ class ParticipantController extends Controller
                         ) as rn
                     ');
 
-            $participants = DB::query()
-                ->fromSub($sub, 't')
-                ->where('t.rn', 1)
-                ->rightJoin('curricula as c', 'c.id', '=', 'curriculum_id')
-                ->select([
-                    't.id as pa_id',
-                    't.name as pa_name',
-                    'c.curriculum_code as cu_code',
-                    'c.name as cu_name',
-                    't.starting_date as st_date',
-                    't.completion_date as co_date',
-                ])
-                ->latest('st_date')
-                ->get();
+        //
+        $participants = DB::query()
+            ->fromSub($sub, 't')
+            ->where('t.rn', 1)
+            ->leftJoin('curricula as c', 'c.id', '=', 'curriculum_id')
+            ->select([
+                't.id as pa_id', // 受講者ID
+                't.name as pa_name', // 受講者名
+                'c.curriculum_code as cu_code', // カリキュラムコード
+                'c.name as cu_name', // カリキュラム名
+                't.starting_date as st_date', // 課題送信日
+                't.completion_date as co_date', // 課題完了日
+            ])
+            ->latest('st_date')
+            ->get();
 
-        //     $sub = DB::table('participant_curricula as pc')
-        //         ->join('participant_chapters as pch', 'pc.participant_chapter_id', '=', 'pch.id')
-        //         ->join('curricula as c', 'pc.curriculum_id', '=', 'c.id')
-        //         ->whereNull('pc.completion_date')
-        //         ->whereNull('pch.completion_date')
-        //         ->whereNotNull('pch.starting_date')
-        //         ->selectRaw('
-        //     pch.participant_id,
-        //     pc.starting_date,
-        //     c.curriculum_code as curriculum_code,
-        //     c.name as curriculum_name,
-        //     ROW_NUMBER() OVER (
-        //         PARTITION BY pch.participant_id
-        //         ORDER BY c.curriculum_number
-        //     ) as rn
-        // ')
-        //     $participants = DB::query()
-        //         ->fromSub($sub, 't')
-        //         ->where('t.rn', 1)
-        //         ->rightJoin('participants as p', 'p.id', '=', 't.participant_id')
-        //         ->select([
-        //             'p.id as pa_id',
-        //             'p.name as pa_name',
-        //             't.curriculum_code as cu_code',
-        //             't.curriculum_name as cu_name',
-        //             't.starting_date as st_date',
-        //         ])
-        //         ->orderBy('p.name')
-        //         ->get();
+        $starting = $participants->whereNull('co_date')->whereNotNull('st_date');
+        $stoped = $participants->whereNotNull('co_date');
+        $notRegistered = $participants->whereNull('co.date')->whereNull('st_date');
 
         return Inertia::render('Participant/Index',[
             'participants' => $participants,
+            'starting' => $starting,
+            'stoped' => $stoped,
+            'notRegistered' => $notRegistered,
         ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * 受講者登録画面
      */
     public function create()
     {
@@ -96,7 +79,7 @@ class ParticipantController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * 受講者登録処理
      */
     public function store(StoreParticipantRequest $request)
     {
@@ -132,7 +115,7 @@ class ParticipantController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * 受講者課題確認画面
      */
     public function show(Participant $participant)
     {
@@ -141,6 +124,15 @@ class ParticipantController extends Controller
         $nextCurriculum = $participant?->nextCurrentCurriculum();
 
         $prevCurriculum = $participant->prevCurriculum()?->curriculum;
+
+        if(!$nextCurriculum){
+            $nextChapter = $participant?->participantChapters()->orderBy('chapter_order')->first();
+            if($nextChapter){
+                $nextCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
+                    ->where('curriculum_number', 1)
+                    ->first();
+            }
+        }
 
         // if(!$curriculum){
 
@@ -157,7 +149,7 @@ class ParticipantController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * 受講者編集画面
      */
     public function edit(Participant $participant)
     {
@@ -204,7 +196,7 @@ class ParticipantController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * 受講者編集処理
      */
     public function update(UpdateParticipantRequest $request, Participant $participant)
     {
@@ -220,12 +212,17 @@ class ParticipantController extends Controller
             $add = array_diff($new, $current);
             $delete = array_diff($current, $new);
 
+
+            $chapterOrder = $participant->participantChapters()->latest('chapter_order')->first()->chapter_order ?? 0;
+            // dd($chapterOrder);
+
             // 追加
             foreach ($add as $chapterId) {
                 $participant->participantChapters()->create([
                     'chapter_id' => $chapterId,
-                    'chapter_order' => 0
+                    'chapter_order' => $chapterOrder + 1
                 ]);
+                $chapterOrder++;
             }
 
             // 削除
@@ -234,6 +231,9 @@ class ParticipantController extends Controller
                     ->whereIn('chapter_id', $delete)
                     ->delete();
             }
+            // if(!$participant->currentCurriculum()){
+            //     $participant->startCurriculum();
+            // }
         });
 
         return redirect()->route('participants.edit', $participant);
