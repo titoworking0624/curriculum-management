@@ -65,12 +65,16 @@ class ParticipantCurriculum extends Model
     //     $currentChapter = $this->participantChapter()->chapter();
     //     dd($currentChapter);
     // }
-    public function isLastCurriculum(): bool
-    {
-        return !Curriculum::where('chapter_id', $this->curriculum->chapter_id)
-            ->where('curriculum_number', '>', $this->curriculum->curriculum_number)
-            ->exists();
-    }
+    // /**
+    //  * 章の中のカリキュラムが存在するか判定
+    //  * 章内に未完了のカリキュラムが存在していなかったらTrue
+    //  */
+    // public function isLastCurriculum(): bool
+    // {
+    //     return !Curriculum::where('chapter_id', $this->curriculum->chapter_id)
+    //         ->where('curriculum_number', '>', $this->curriculum->curriculum_number)
+    //         ->exists();
+    // }
 
 
 }

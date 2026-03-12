@@ -64,6 +64,10 @@ class Participant extends Model
 
         return $nextChapter;
     }
+
+    /**
+     * 次の課題を作成
+     */
     public function nextCurriculum()
     {
         $nextChapter = $this->nextChapter();
@@ -78,6 +82,10 @@ class Participant extends Model
 
         return $firstCurriculum;
     }
+
+    /**
+     * 現在の課題の一つ後の課題を取得
+     */
     public function nextCurrentCurriculum()
     {
         $current = $this->currentCurriculum() ?? $this->prevCurriculum();
@@ -103,6 +111,9 @@ class Participant extends Model
         return $nextCurriculum;
     }
 
+    /**
+     * 現在の課題の一つ前の（完了日が一番新しい）課題を取得
+     */
     public function prevCurriculum()
     {
         $prevCurriculum = $this->participantCurricula()
@@ -119,6 +130,9 @@ class Participant extends Model
         return $prevCurriculum;
     }
 
+    /**
+     * 登録されている未開始のチャプターを開始し、最初のカリキュラムを開始する
+     */
     public function startCurriculum()
     {
         $nextChapter = $this->participantChapters()
@@ -147,7 +161,8 @@ class Participant extends Model
         ]);
     }
     /**
-     *
+     * 章の中のカリキュラムが存在するか判定
+     * 章内に未完了のカリキュラムが存在していなかったらTrue
      */
     public function isLastCurriculum(): bool
     {

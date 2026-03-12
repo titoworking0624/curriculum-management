@@ -72,7 +72,7 @@ class ParticipantCurriculumController extends Controller
             ->where('chapter_order', $participantChapter->chapter_order + 1)
             ->first();
 
-        dd($nextChapter);
+        // dd($nextChapter);
         if (!$nextChapter) {
             return; // 全course完了
         }
