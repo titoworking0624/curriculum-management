@@ -140,22 +140,23 @@ class ParticipantCurriculumController extends Controller
     public function startCurriculum(Participant $participant)
     {
         DB::transaction(function() use ($participant){
-            if($participant->participantCurricula()->isLastCurriculum()){
+
+            if($participant->isLastCurriculum()){
                 $participant->startCurriculum();
             }else{
-                $current = $participant->currentCurriculum();
+                $prev = $participant->prevCurriculum();
 
-                $next = Curriculum::where('chapter_id', $current->curriculum->chapter_id)
-                    ->where('curriculum_number', $current->curriculum->curriculum_number + 1)
+                $next = Curriculum::where('chapter_id', $prev->curriculum->chapter_id)
+                    ->where('curriculum_number', $prev->curriculum->curriculum_number + 1)
                     ->first();
 
                 ParticipantCurriculum::create([
-                    'participant_chapter_id' => $current->participant_chapter_id,
+                    'participant_chapter_id' => $prev->participant_chapter_id,
                     'curriculum_id' => $next->id,
                     'starting_date' => now()
                 ]);
             }
         });
-        return response()->json(['success' => true]);
+        return redirect()->back();
     }
 }

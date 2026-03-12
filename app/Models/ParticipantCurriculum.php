@@ -60,6 +60,11 @@ class ParticipantCurriculum extends Model
     //         'starting_date' => now(),
     //     ]);
     // }
+    // public function nextChapter()
+    // {
+    //     $currentChapter = $this->participantChapter()->chapter();
+    //     dd($currentChapter);
+    // }
     public function isLastCurriculum(): bool
     {
         return !Curriculum::where('chapter_id', $this->curriculum->chapter_id)

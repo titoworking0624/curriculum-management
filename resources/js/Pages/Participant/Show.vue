@@ -44,23 +44,19 @@ const props =
 const completeCurriculum = () => {
     router.patch(route('complete',{participant:props.participant.id}), {}, {
         onSuccess: () => {
-            router.reload({ only: ['curriculum','prevCurriculum','nextCurriculum'] })
+            router.get(route('participants.show', props.participant.id))
         }
     })
 }
 const cancelCurriculum = () => {
     router.patch(route('cancelComplete',{participant:props.participant.id}), {}, {
         onSuccess: () => {
-            router.reload({ only: ['curriculum','prevCurriculum','nextCurriculum'] })
+            router.get(route('participants.show', props.participant.id))
         }
     })
 }
 const startCurriculum = () => {
-    router.patch(route('startCurriculum',{participant:props.participant.id}), {}, {
-        onSuccess: () => {
-            router.reload({ only: ['curriculum','prevCurriculum','nextCurriculum'] })
-        }
-    })
+    router.patch(route('startCurriculum',{participant:props.participant.id}))
 }
 
 const title = props.participant.name + " - " + "現在の課題"
@@ -135,12 +131,19 @@ const subtitle = props.participant.name
                     <CancelButton @click="cancelCurriculum" class="mr-auto">提出完了キャンセル</CancelButton>
                 </div>
                 <div v-if="curriculum" class="flex flex-col ml-auto">
-                    <span>{{ curriculum.curriculum_code }}:{{ curriculum.name }}</span>
+                    <!-- <span>現在の課題：{{ curriculum.curriculum_code }}:{{ curriculum.name }}</span> -->
+                    <span v-if="nextCurriculum">次の課題：{{ nextCurriculum.curriculum_code }}:{{ nextCurriculum.name }}</span>
+                    <span v-else>次の課題：未登録</span>
                     <PrimaryButton @click="completeCurriculum" class="ml-auto">提出完了</PrimaryButton>
                 </div>
                 <div v-else class="flex flex-col ml-auto">
-                    <span v-if="nextCurriculum">{{ nextCurriculum.curriculum_code }}:{{ nextCurriculum.name }}</span>
-                    <PrimaryButton  @click="startCurriculum" class="ml-auto">課題スタート</PrimaryButton>
+                    <template v-if="nextCurriculum">
+                        <span>{{ nextCurriculum.curriculum_code }}:{{ nextCurriculum.name }}</span>
+                        <PrimaryButton  @click="startCurriculum" class="ml-auto">課題スタート</PrimaryButton>
+                    </template>
+                    <template v-else>
+                        <span>カリキュラム未登録</span>
+                    </template>
                 </div>
             </div>
           </div>

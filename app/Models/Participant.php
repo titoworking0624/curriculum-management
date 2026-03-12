@@ -28,6 +28,18 @@ class Participant extends Model
             'id'                        // local key on participant_chapters
         );
     }
+    public function currentChapter()
+    {
+        $current = $this->participantChapters()
+            ->whereNotNull('participant_chapters.starting_date')
+            ->with([
+                'participantCurricula.curriculum',
+                'chapter'
+                ])
+            ->first();
+
+        return $current;
+    }
     public function currentCurriculum()
     {
         $current = $this->participantCurricula()
@@ -41,12 +53,20 @@ class Participant extends Model
         return $current;
     }
 
-    public function nextCurriculum()
+    public function nextChapter()
     {
         $nextChapter = $this->participantChapters()
-            ->whereNull('participant_chapters.completion_date')
+            ->whereNull('participant_chapters.starting_date')
             ->orderBy('chapter_order')
             ->first();
+
+        // dd($nextChapter);
+
+        return $nextChapter;
+    }
+    public function nextCurriculum()
+    {
+        $nextChapter = $this->nextChapter();
         // dd($next);
         if (!$nextChapter) {
             return null;
@@ -61,16 +81,23 @@ class Participant extends Model
     public function nextCurrentCurriculum()
     {
         $current = $this->currentCurriculum() ?? $this->prevCurriculum();
-        if(!$current){
-            return null;
+        if($current){
+            $nextCurriculum = Curriculum::where('chapter_id', $current->participantChapter->chapter_id)
+                ->where('curriculum_number', $current->curriculum->curriculum_number + 1)
+                ->first();
+        }else{
+            $nextCurriculum = null;
         }
-        // dd($current->curriculum);
-        $nextCurriculum = Curriculum::where('chapter_id', $current->participantChapter->chapter_id)
-            ->where('curriculum_number', $current->curriculum->curriculum_number + 1)
-            ->first();
         // dd($this->nextCurriculum());
+        // dd($nextCurriculum);
         if (!$nextCurriculum) {
-            return $this->nextCurriculum();
+            $nextChapter = $this->nextChapter();
+            // dd($nextChapter);
+            if(!$nextChapter){
+                return null;
+            }
+            // dd($nextChapter?->firstCurriculum());
+            return $nextChapter?->firstCurriculum() ?? null;
         }
 
         return $nextCurriculum;
@@ -118,5 +145,16 @@ class Participant extends Model
             'curriculum_id' => $firstCurriculum->id,
             'starting_date' => now()
         ]);
+    }
+    /**
+     *
+     */
+    public function isLastCurriculum(): bool
+    {
+        $participantCurriculum = $this->participantCurricula()->latest('id')->first()->curriculum;
+        // dd($participantCurriculum);
+        return !Curriculum::where('chapter_id', $participantCurriculum->chapter_id)
+            ->where('curriculum_number', '>', $participantCurriculum->curriculum_number)
+            ->exists();
     }
 }

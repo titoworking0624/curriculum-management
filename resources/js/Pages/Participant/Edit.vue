@@ -3,6 +3,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import ChapterDropdown from '@/Components/Participant/ChapterDropdown.vue';
 import CourseDropdown from '@/Components/Participant/CourseDropdown.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SubmitButton from '@/Components/SubmitButton.vue';
 import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
@@ -117,11 +118,14 @@ const storeParticipant = () => {
         >
         <div class="p-2">
             <div class="relative">
-                <InputLabel
-                for="name"
-                    class="text-sm leading-7 text-gray-600"
-                    value="受講者名"
-                />
+                <div class="flex">
+                    <InputLabel
+                    for="name"
+                        class="text-sm leading-7 text-gray-600"
+                        value="受講者名"
+                    />
+                    <PrimaryButton class="ml-auto mb-2" :href="route('participants.show',{participant:participant.id})">課題確認</PrimaryButton>
+                </div>
                 <input
                     type="text"
                     id="name"

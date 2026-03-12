@@ -32,9 +32,10 @@ class ParticipantController extends Controller
                         pcu.curriculum_id as curriculum_id,
                         pcu.starting_date as starting_date,
                         pcu.completion_date as completion_date,
+                        pch.chapter_id as chapter_id,
                         ROW_NUMBER() OVER (
                             PARTITION BY p.id
-                            ORDER BY pcu.starting_date DESC
+                            ORDER BY pcu.curriculum_id DESC
                         ) as rn
                     ');
 
@@ -42,12 +43,14 @@ class ParticipantController extends Controller
         $participants = DB::query()
             ->fromSub($sub, 't')
             ->where('t.rn', 1)
+            ->leftJoin('chapters as ch', 'ch.id', '=', 'chapter_id')
             ->leftJoin('curricula as c', 'c.id', '=', 'curriculum_id')
             ->select([
                 't.id as pa_id', // 受講者ID
                 't.name as pa_name', // 受講者名
                 'c.curriculum_code as cu_code', // カリキュラムコード
                 'c.name as cu_name', // カリキュラム名
+                'ch.name as ch_name', // 章(チャプター)名
                 't.starting_date as st_date', // 課題送信日
                 't.completion_date as co_date', // 課題完了日
             ])
@@ -122,17 +125,18 @@ class ParticipantController extends Controller
         $curriculum = $participant->currentCurriculum()?->curriculum;
 
         $nextCurriculum = $participant?->nextCurrentCurriculum();
+        // dd($nextCurriculum);
 
         $prevCurriculum = $participant->prevCurriculum()?->curriculum;
 
-        if(!$nextCurriculum){
-            $nextChapter = $participant?->participantChapters()->orderBy('chapter_order')->first();
-            if($nextChapter){
-                $nextCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
-                    ->where('curriculum_number', 1)
-                    ->first();
-            }
-        }
+        // if(!$nextCurriculum){
+        //     $nextChapter = $participant?->participantChapters()->orderBy('chapter_order')->first();
+        //     if($nextChapter){
+        //         $nextCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
+        //             ->where('curriculum_number', 1)
+        //             ->first();
+        //     }
+        // }
 
         // if(!$curriculum){
 

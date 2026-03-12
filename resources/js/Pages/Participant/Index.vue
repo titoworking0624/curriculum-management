@@ -48,7 +48,7 @@ defineProps({
         <table class="table-auto w-full text-left whitespace-no-wrap">
           <thead>
             <tr>
-              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">提出確認</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">課題送信</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">受講者</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">課題番号</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">課題名</th>
@@ -78,6 +78,7 @@ defineProps({
             <tr>
                 <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">課題スタート</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">受講者</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">登録チャプター名</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">編集</th>
             </tr>
           </thead>
@@ -87,6 +88,8 @@ defineProps({
                     <td class="px-4 py-3">
                       <PrimaryButton :href="route('participants.show',{participant:p.pa_id})">確認</PrimaryButton></td>
                       <td class="px-4 py-3">{{p.pa_name}}</td>
+                      <td v-if="p.ch_name" class="px-4 py-3">{{p.ch_name}}</td>
+                      <td v-else class="px-4 py-3">カリキュラム未登録</td>
                       <td class="px-4 py-3"><SecondaryButton :href="route('participants.edit',{participant:p.pa_id})">編集</SecondaryButton></td>
                 </template>
               </tr>
