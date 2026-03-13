@@ -4,22 +4,35 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SubmitButton from '@/Components/SubmitButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import ChapterDraggableList from '@/Layouts/Chapter/ChapterDraggableList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
+import { Chapter, Course } from '@/types/course';
 import { useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
-const props = defineProps({
-    course:{
-        type:Object,
-        required:true,
-    },
-    errors:Object,
-})
+const props = defineProps<{
+    chapters:Chapter[],
+    course:Course,
+    errors:object,
+}>()
+
+const chaptersId = props.chapters.map(c => ({id:c.id}))
+
+const listChapters = ref([...props.chapters]);
 
 const form = useForm({
     id:props.course.id,
     code:props.course.course_code,
     name:props.course.name,
+    chapters:chaptersId,
 })
+
+const updateFormOrder = () =>{
+    form.chapters = listChapters.value.map(c => ({
+        id:c.id
+    }))
+}
+
 </script>
 
 <template>
@@ -39,12 +52,13 @@ const form = useForm({
                 <InputError :message="form.errors.name"/>
             </div>
           </div>
-          <!-- <div class="p-2 w-full">
+          <div class="p-2 w-full">
             <div class="relative">
-              <label for="message" class="leading-7 text-sm text-gray-600">Message</label>
-              <textarea id="message" name="message" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
+                <ChapterDraggableList
+                    v-model="listChapters"
+                    @end="updateFormOrder"/>
             </div>
-          </div> -->
+          </div>
           <div class="p-2 w-full">
             <SubmitButton class="mx-auto mt-8">更新する</SubmitButton>
           </div>

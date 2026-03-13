@@ -25,12 +25,9 @@ const form = useForm({
     name: props.participant.name,
 });
 const initialChapterIds = new Set(
-  props.participant.participant_curricula.flatMap(pc => pc.participant_chapter.chapter.id)
-//   props.participantChapters.map(pc => pc.chapter.id)
+  props.participant.participant_curricula
+    .flatMap(pc => pc.participant_chapter.chapter.id)
 )
-const chapterIds = props.participant.participant_chapters.map(pc => pc.chapter.id)
-
-form.chapters = [...new Set(chapterIds)]
 
 const allChapters = computed<ChapterWithCourseName[]>(() =>
   props.courses.flatMap(course =>
@@ -38,43 +35,68 @@ const allChapters = computed<ChapterWithCourseName[]>(() =>
       ...ch,
       courseName: course.name,
       isStarting: initialChapterIds.has(ch.id),
-      completion_date: props.participant.participant_chapters.find(c => c.chapter.id == ch.id)?.completion_date
+      completion_date: props.participant.participant_chapters
+        .find(c => c.chapter.id === ch.id)?.completion_date
     }))
   )
 )
 
-const selectedChapters = computed(() =>
-  allChapters.value.filter(ch => form.chapters.includes(ch.id))
+const selectedChapters = ref<ChapterWithCourseName[]>([])
+
+const draggableChapters = ref<ChapterWithCourseName[]>([])
+
+const fixedChapters = computed(() =>
+  selectedChapters.value.filter(c => c.isStarting)
 )
 
-const removeChapter = (chapterId:number) => {
-  form.chapters = form.chapters.filter(id => id !== chapterId)
-}
+const orderedChapters = computed(() => [
+  ...fixedChapters.value,
+  ...draggableChapters.value
+])
+onMounted(() => {
 
+  const chapterIds =
+    props.participant.participant_chapters.map(pc => pc.chapter.id)
+
+  const chapters =
+    allChapters.value.filter(ch => chapterIds.includes(ch.id))
+
+  selectedChapters.value = chapters
+
+  draggableChapters.value =
+    chapters.filter(c => !c.isStarting)
+
+})
+const removeChapter = (chapterId:number) => {
+
+  draggableChapters.value =
+    draggableChapters.value.filter(c => c.id !== chapterId)
+
+}
+// watch(selectedChapters,(chapters)=>{
+
+//   form.chapters = chapters.map(c => c.id)
+
+// },{deep:true})
 // const selectedCurricula = ref<CurriculumWithCourseName[]>(props.participantChapters)
 
 // const addCourses = props.courses.find(c => c.id === designCourseId)
 
-const handleSelectCourse = (id: number) => {
-    const course = props.courses.find(c => c.id === id)
+const handleSelectCourse = (id:number) => {
 
-    if (!course) return
+  const course = props.courses.find(c => c.id === id)
+  if(!course) return
 
-    const toChapterWithCourseName = course.chapters.map((chapter) => ({
+  for(const chapter of course.chapters){
+
+    if(!orderedChapters.value.some(c => c.id === chapter.id)){
+
+      draggableChapters.value.push({
         ...chapter,
-        courseName: course.name,
-    }))
-    //   console.log(chapters)
-
-    for(const chapter of toChapterWithCourseName){
-        // console.log(chapter)
-        // const chapterId = chapter.id
-        // console.log(chapterId)
-        if(!selectedChapters.value.some(c => c.id === chapter.id)){
-            selectedChapters.value.push(chapter)
-            form.chapters.push(chapter.id)
-        }
+        courseName: course.name
+      })
     }
+  }
 }
 
 const selectedCourses = ref<Course[]>([...props.courses])
@@ -92,22 +114,24 @@ watch(selectedCourseId, (id) => {
 // watch(selectedChapters, (ch) => {
 //   form.chapters.push(ch.id)
 // })
-
 const handleSelectChapter = (chapter: ChapterWithCourseName) => {
 
-    if(!selectedChapters.value.some(c => c.id === chapter.id)){
-        selectedChapters.value.push(chapter)
-        form.chapters.push(chapter.id)
-    }
-}
-// const removeChapter = (id: number) => {
-//     selectedChapters.value = selectedChapters.value.filter(c => c.id !== id)
-// }
-const storeParticipant = () => {
-    // form.chapters = selectedChapters
-    form.put(route('participants.update',{participant:props.participant.id}))
+  if(!orderedChapters.value.some(c => c.id === chapter.id)){
+    draggableChapters.value.push(chapter)
+  }
+
 }
 
+const storeParticipant = () => {
+
+  form.chapters =
+    orderedChapters.value.map(c => c.id)
+
+  form.put(
+    route('participants.update',{participant:props.participant.id})
+  )
+
+}
 </script>
 
 <template>
@@ -192,7 +216,10 @@ const storeParticipant = () => {
                         class="text-sm leading-7 text-gray-600"
                         value="受講チャプター"
                     />
-                    <ParticipantChapter :chapters="selectedChapters" @removeChapter="removeChapter"
+                    <ParticipantChapter
+                        v-model="draggableChapters"
+                        :fixedChapters="fixedChapters"
+                        @removeChapter="removeChapter"
                         class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200" />
                 </div>
             </div>

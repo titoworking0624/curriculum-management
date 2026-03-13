@@ -36,6 +36,7 @@ Route::get('/',[ParticipantController::class,'index'])->name('index');
 Route::resource('/participants', ParticipantController::class,['only' => ['create','store','edit','update','show']]);
 Route::patch('/participants/{participant}/curriculum/next',[ParticipantCurriculumController::class,'complete'])->name('complete');
 Route::patch('/participants/{participant}/curriculum/cancel',[ParticipantCurriculumController::class, 'cancelComplete'])->name('cancelComplete');
+Route::patch('/participants/{participant}/curriculum/stop',[ParticipantCurriculumController::class, 'stopCurriculum'])->name('stopCurriculum');
 Route::patch('/participants/{participant}/curriculum/start',[ParticipantCurriculumController::class, 'startCurriculum'])->name('startCurriculum');
 
 Route::resource('/courses', CourseController::class,['only' => ['index','create','store','edit','update','show']]);

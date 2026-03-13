@@ -28,10 +28,14 @@ class Participant extends Model
             'id'                        // local key on participant_chapters
         );
     }
+    /**
+     * 現在の章を取得
+     */
     public function currentChapter()
     {
         $current = $this->participantChapters()
             ->whereNotNull('participant_chapters.starting_date')
+            ->latest('id')
             ->with([
                 'participantCurricula.curriculum',
                 'chapter'
@@ -40,6 +44,9 @@ class Participant extends Model
 
         return $current;
     }
+    /**
+     * 現在の課題を取得する
+     */
     public function currentCurriculum()
     {
         $current = $this->participantCurricula()
@@ -53,6 +60,9 @@ class Participant extends Model
         return $current;
     }
 
+    /**
+     * 登録されている中で、次に進む章を取得
+     */
     public function nextChapter()
     {
         $nextChapter = $this->participantChapters()
@@ -65,23 +75,23 @@ class Participant extends Model
         return $nextChapter;
     }
 
-    /**
-     * 次の課題を作成
-     */
-    public function nextCurriculum()
-    {
-        $nextChapter = $this->nextChapter();
-        // dd($next);
-        if (!$nextChapter) {
-            return null;
-        }
-        // その chapter の curriculum1開始
-        $firstCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
-            ->where('curriculum_number', 1)
-            ->first();
+    // /**
+    //  * 次の課題を作成
+    //  */
+    // public function nextCurriculum()
+    // {
+    //     $nextChapter = $this->nextChapter();
+    //     // dd($next);
+    //     if (!$nextChapter) {
+    //         return null;
+    //     }
+    //     // その chapter の curriculum1取得
+    //     $firstCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
+    //         ->where('curriculum_number', 1)
+    //         ->first();
 
-        return $firstCurriculum;
-    }
+    //     return $firstCurriculum;
+    // }
 
     /**
      * 現在の課題の一つ後の課題を取得
@@ -89,6 +99,7 @@ class Participant extends Model
     public function nextCurrentCurriculum()
     {
         $current = $this->currentCurriculum() ?? $this->prevCurriculum();
+        // dd($current);
         if($current){
             $nextCurriculum = Curriculum::where('chapter_id', $current->participantChapter->chapter_id)
                 ->where('curriculum_number', $current->curriculum->curriculum_number + 1)

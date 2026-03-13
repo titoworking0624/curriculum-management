@@ -159,4 +159,24 @@ class ParticipantCurriculumController extends Controller
         });
         return redirect()->back();
     }
+    public function stopCurriculum(Participant $participant)
+    {
+        DB::transaction(function() use ($participant){
+            $current = $participant->currentCurriculum();
+
+            if (!$current) {
+                return response()->json(['message' => 'No curriculum'], 404);
+            }
+            // dd($current);
+            if($current->isFirstCurriculum()){
+                // dd($participant->currentChapter());
+                $participant->currentChapter()->update([
+                    'starting_date' => null,
+                ]);
+            }
+
+            $current->delete();
+        });
+        return redirect()->back();
+    }
 }

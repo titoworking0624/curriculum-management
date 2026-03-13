@@ -75,6 +75,10 @@ class ParticipantCurriculum extends Model
     //         ->where('curriculum_number', '>', $this->curriculum->curriculum_number)
     //         ->exists();
     // }
+    public function isFirstCurriculum(): bool
+    {
+        return $this->curriculum()->where('curriculum_number',1)->exists();
+    }
 
 
 }

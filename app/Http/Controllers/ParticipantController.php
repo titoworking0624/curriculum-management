@@ -216,25 +216,28 @@ class ParticipantController extends Controller
             $add = array_diff($new, $current);
             $delete = array_diff($current, $new);
 
+            // dd($current,$new,$add,$delete);
 
-            $chapterOrder = $participant->participantChapters()->latest('chapter_order')->first()->chapter_order ?? 0;
             // dd($chapterOrder);
-
-            // 追加
-            foreach ($add as $chapterId) {
-                $participant->participantChapters()->create([
-                    'chapter_id' => $chapterId,
-                    'chapter_order' => $chapterOrder + 1
-                ]);
-                $chapterOrder++;
-            }
-
             // 削除
             if ($delete) {
                 $participant->participantChapters()
-                    ->whereIn('chapter_id', $delete)
-                    ->delete();
-            }
+                ->whereIn('chapter_id', $delete)
+                ->delete();
+                }
+
+            // $chapterOrder = $participant->participantChapters()->latest('chapter_order')->first()->chapter_order ?? 0;
+            // 追加
+            // foreach ($add as $chapterId) {
+            //     $participant->participantChapters()->create([
+            //         'chapter_id' => $chapterId,
+            //         'chapter_order' => $chapterOrder + 1
+            //     ]);
+            //     $chapterOrder++;
+            // }
+
+            $this->updateOrder($request);
+
             // if(!$participant->currentCurriculum()){
             //     $participant->startCurriculum();
             // }
@@ -250,5 +253,36 @@ class ParticipantController extends Controller
     {
         //
     }
+    private function updateOrder(UpdateParticipantRequest $request)
+    {
+        $chapters = $request->chapters;
 
+        DB::transaction(function () use ($chapters) {
+
+            $cases = [];
+            $ids = [];
+
+            foreach ($chapters as $index => $chapter) {
+
+                $id = $chapter['id'];
+                $order = $index + 1;
+
+                $cases[] = "WHEN {$id} THEN {$order}";
+                $ids[] = $id;
+            }
+
+            $ids = implode(',', $ids);
+            $cases = implode(' ', $cases);
+
+            DB::update("
+            UPDATE participant_chapters
+            SET chapter_order = CASE id
+                {$cases}
+            END
+            WHERE id IN ({$ids})
+        ");
+        });
+
+        return back();
+    }
 }

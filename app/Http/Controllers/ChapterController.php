@@ -86,11 +86,13 @@ class ChapterController extends Controller
     {
         // dd($chapter);
         $course = $chapter->course()->with('chapters')->first();
+        $curricula = $chapter->curricula()->orderBy('curriculum_number')->get();
         // dd($course);
 
         return Inertia::render('Chapter/Edit',[
             'course' => $course,
             'chapter' => $chapter,
+            'curricula' => $curricula,
         ]);
     }
 
@@ -99,16 +101,20 @@ class ChapterController extends Controller
      */
     public function update(UpdateChapterRequest $request, Chapter $chapter)
     {
+        // dd($request);
         $chapter->chapter_number = $request->chapter_number;
         $chapter->name = $request->name;
         $chapter->save();
 
-        $course = $chapter->course()->first();
-        $chapters = $course->chapters()->get();
+        $this->updateOrder($request);
 
-        return to_route('courses.show', [
-            'course' => $course,
-            'chapters' => $chapters,
+        // $course = $chapter->course()->first();
+        // $chapters = $course->chapters()->get();
+
+        return to_route('chapters.show', [
+            'course' => $chapter->course,
+            'chapter' => $chapter,
+            'curricula' => $chapter->curricula,
         ]);
     }
 
@@ -118,5 +124,38 @@ class ChapterController extends Controller
     public function destroy(Chapter $chapter)
     {
         //
+    }
+    private function updateOrder(UpdateChapterRequest $request)
+    {
+        $curricula = $request->curricula;
+
+        DB::transaction(function () use ($curricula) {
+
+            $cases = [];
+            $ids = [];
+
+            foreach ($curricula as $index => $curriculum) {
+
+                $id = $curriculum['id'];
+                $order = $index + 1;
+
+                $cases[] = "WHEN {$id} THEN {$order}";
+                $ids[] = $id;
+            }
+
+            $ids = implode(',', $ids);
+            $cases = implode(' ', $cases);
+
+            // dd($ids,$cases);
+            DB::update("
+            UPDATE curricula
+            SET curriculum_number = CASE id
+                {$cases}
+            END
+            WHERE id IN ({$ids})
+        ");
+        });
+
+        return back();
     }
 }

@@ -4,24 +4,40 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SubmitButton from '@/Components/SubmitButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import ChapterList from '@/Layouts/Chapter/ChapterList.vue';
+import CurriculumDraggableList from '@/Layouts/Curriculum/CurriculumDraggableList.vue';
+import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
+import { Chapter, Course, Curriculum } from '@/types/course';
 import { useForm } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 
-const props = defineProps({
-    chapter:{
-        type:Object,
-        required:true,
-    },
-    course:Object,
-    errors:Object,
-})
+const props = defineProps<{
+    chapter:Chapter,
+    course:Course,
+    curricula:Curriculum[],
+    errors:object,
+}>()
+
+const curriculaId = props.curricula.map(c => ({ id: c.id }))
+
+const listCurricula = ref([...props.curricula])
 
 const form = useForm({
     id:props.chapter.id,
     course_id:props.chapter.course_id,
     chapter_number:props.chapter.chapter_number,
     name:props.chapter.name,
+    curricula:curriculaId,
 })
+const updateFormOrder = () => {
+  form.curricula = listCurricula.value.map(c => ({ id: c.id }))
+//   console.log(form.curricula)
+}
+// const updateChapter = () => {
+
+// }
+
 </script>
 
 <template>
@@ -41,12 +57,11 @@ const form = useForm({
                 <InputError :message="form.errors.name"/>
             </div>
           </div>
-          <!-- <div class="p-2 w-full">
+          <div class="p-2">
             <div class="relative">
-              <label for="message" class="leading-7 text-sm text-gray-600">Message</label>
-              <textarea id="message" name="message" class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
+                <CurriculumDraggableList v-model="listCurricula" @end="updateFormOrder"/>
             </div>
-          </div> -->
+          </div>
           <div class="p-2 w-full">
             <SubmitButton class="mx-auto mt-8">更新する</SubmitButton>
           </div>

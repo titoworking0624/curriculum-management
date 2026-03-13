@@ -64,8 +64,10 @@ class CourseController extends Controller
      */
     public function edit(Course $course)
     {
+        $chapters = $course->chapters;
         return Inertia::render('Course/Edit',[
             'course' => $course,
+            'chapters' => $chapters,
         ]);
     }
 
@@ -80,6 +82,8 @@ class CourseController extends Controller
         $course->name = $request->name;
         $course->save();
 
+        $this->updateOrder($request);
+
         return Inertia::render('Course/Edit', [
             'course' => $course,
         ]);
@@ -91,5 +95,38 @@ class CourseController extends Controller
     public function destroy(Course $course)
     {
         //
+    }
+    private function updateOrder(UpdateCourseRequest $request)
+    {
+        dd($request);
+        $chapters = $request->chapters;
+
+        DB::transaction(function () use ($chapters) {
+
+            $cases = [];
+            $ids = [];
+
+            foreach ($chapters as $index => $chapter) {
+
+                $id = $chapter['id'];
+                $order = $index + 1;
+
+                $cases[] = "WHEN {$id} THEN {$order}";
+                $ids[] = $id;
+            }
+
+            $ids = implode(',', $ids);
+            $cases = implode(' ', $cases);
+
+            DB::update("
+            UPDATE chapters
+            SET chapter_number = CASE id
+                {$cases}
+            END
+            WHERE id IN ({$ids})
+        ");
+        });
+
+        return back();
     }
 }

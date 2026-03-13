@@ -48,6 +48,13 @@ const completeCurriculum = () => {
         }
     })
 }
+const stopCurriculum = () => {
+    router.patch(route('stopCurriculum',{participant:props.participant.id}), {}, {
+        onSuccess: () => {
+            router.get(route('participants.show', props.participant.id))
+        }
+    })
+}
 const cancelCurriculum = () => {
     router.patch(route('cancelComplete',{participant:props.participant.id}), {}, {
         onSuccess: () => {
@@ -126,7 +133,11 @@ const subtitle = props.participant.name
 
           <div class="p-2 w-full">
             <div class="relative flex justify-between">
-                <div v-if="prevCurriculum" class="flex flex-col mr-auto">
+                <div v-if="curriculum" class="flex flex-col mr-auto">
+                    <span>{{ curriculum.curriculum_code }}:{{ curriculum.name }}</span>
+                    <CancelButton @click="stopCurriculum" class="mr-auto">課題停止</CancelButton>
+                </div>
+                <div v-else-if="prevCurriculum" class="flex flex-col mr-auto">
                     <span>{{ prevCurriculum.curriculum_code }}:{{ prevCurriculum.name }}</span>
                     <CancelButton @click="cancelCurriculum" class="mr-auto">提出完了キャンセル</CancelButton>
                 </div>
