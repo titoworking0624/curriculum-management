@@ -31,14 +31,14 @@ class ParticipantCurriculum extends Model
     {
         return $this->belongsTo(Curriculum::class);
     }
-    public function scopeIncomplete(Builder $query)
-    {
-        return $query->whereNull('completion_date');
-    }
-    public function scopeCompleted($query)
-    {
-        return $query->whereNotNull('completion_date');
-    }
+    // public function scopeIncomplete(Builder $query)
+    // {
+    //     return $query->whereNull('completion_date');
+    // }
+    // public function scopeCompleted($query)
+    // {
+    //     return $query->whereNotNull('completion_date');
+    // }
     // public function nextCurriculum()
     // {
     //     return Curriculum::where('chapter_id', $this->curriculum->chapter_id)
@@ -75,6 +75,8 @@ class ParticipantCurriculum extends Model
     //         ->where('curriculum_number', '>', $this->curriculum->curriculum_number)
     //         ->exists();
     // }
+
+    // チャプター内に1番目のカリキュラムが存在しているか
     public function isFirstCurriculum(): bool
     {
         return $this->curriculum()->where('curriculum_number',1)->exists();

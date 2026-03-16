@@ -4,7 +4,7 @@ import HeadLayout from './HeadLayout.vue';
 
 defineProps({
     title:String,
-    decoration:String,
+    decoration:String, // サブタイトル
 })
 </script>
 

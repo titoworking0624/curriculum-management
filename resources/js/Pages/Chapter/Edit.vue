@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SubmitButton from '@/Components/SubmitButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import ChapterList from '@/Layouts/Chapter/ChapterList.vue';
 import CurriculumDraggableList from '@/Layouts/Curriculum/CurriculumDraggableList.vue';
-import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
 import { Chapter, Course, Curriculum } from '@/types/course';
 import { useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 
 const props = defineProps<{
     chapter:Chapter,
@@ -19,8 +15,10 @@ const props = defineProps<{
     errors:object,
 }>()
 
+// チャプター内カリキュラムID一覧
 const curriculaId = props.curricula.map(c => ({ id: c.id }))
 
+// カリキュラムリスト
 const listCurricula = ref([...props.curricula])
 
 const form = useForm({
@@ -30,6 +28,8 @@ const form = useForm({
     name:props.chapter.name,
     curricula:curriculaId,
 })
+
+// フォームの順番を更新
 const updateFormOrder = () => {
   form.curricula = listCurricula.value.map(c => ({ id: c.id }))
 //   console.log(form.curricula)
@@ -59,6 +59,7 @@ const updateFormOrder = () => {
           </div>
           <div class="p-2">
             <div class="relative">
+                <!-- 順番入れ替え可能なカリキュラムリスト -->
                 <CurriculumDraggableList v-model="listCurricula" @end="updateFormOrder"/>
             </div>
           </div>

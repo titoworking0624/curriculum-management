@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('chapter_id')->constrained()->cascadeOnDelete();
             $table->integer('curriculum_number');
-            $table->string('curriculum_code')->nullable();
+            $table->string('curriculum_code')->nullable(); // いらないかも
             $table->string('name');
             $table->text('content');
             $table->text('checklist');

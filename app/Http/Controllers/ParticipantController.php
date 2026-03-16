@@ -37,12 +37,12 @@ class ParticipantController extends Controller
                             PARTITION BY p.id
                             ORDER BY pcu.curriculum_id DESC
                         ) as rn
-                    ');
+                    '); // 課題作成順に番号を割り振る
 
         //
         $participants = DB::query()
             ->fromSub($sub, 't')
-            ->where('t.rn', 1)
+            ->where('t.rn', 1) // 課題作成順の最新を取得
             ->leftJoin('chapters as ch', 'ch.id', '=', 'chapter_id')
             ->leftJoin('curricula as c', 'c.id', '=', 'curriculum_id')
             ->select([
@@ -57,9 +57,9 @@ class ParticipantController extends Controller
             ->latest('st_date')
             ->get();
 
-        $starting = $participants->whereNull('co_date')->whereNotNull('st_date');
-        $stoped = $participants->whereNotNull('co_date');
-        $notRegistered = $participants->whereNull('co.date')->whereNull('st_date');
+        $starting = $participants->whereNull('co_date')->whereNotNull('st_date'); // 現在の課題がある受講者一覧
+        $stoped = $participants->whereNotNull('co_date'); // 現在の課題が存在しない受講者一覧
+        $notRegistered = $participants->whereNull('co.date')->whereNull('st_date'); // 課題が未開始の受講者一覧
 
         return Inertia::render('Participant/Index',[
             'participants' => $participants,
@@ -88,27 +88,30 @@ class ParticipantController extends Controller
     {
         // dd($request);
         DB::transaction(function () use ($request) {
+            // 受講者を登録
             $participant = Participant::create([
                 'name' => $request->name
             ]);
 
+            // チャプター一覧
             $chapters = $request->chapters;
 
-            // dd($chapters);
-            $chapterOrder = 1;
+            $chapterOrder = 1; // チャプター順の初期値
+            // チャプターごとに
             foreach($chapters as $chapter){
                 // dd($chapter['id']);
+                // チャプターを受講者に登録する
                 $participantChapter = $participant->participantChapters()->create([
-                    'chapter_id' => $chapter['id'],
-                    'chapter_order' => $chapterOrder,
-                    'starting_date' => $chapterOrder === 1 ? now() : null,
+                    'chapter_id' => $chapter['id'], // チャプターID
+                    'chapter_order' => $chapterOrder, // チャプター順
+                    // 'starting_date' => $chapterOrder === 1 ? now() : null, // チャプター順が1番目を開始させる
                 ]);
-                // curricula生成
-                if($chapterOrder === 1){
-                    // dd($chapterOrder);
-                    $participantChapter->syncCurricula(1);
-                    // dd($participantChapter->participantCurricula());
-                }
+                // カリキュラム生成
+                // if($chapterOrder === 1){
+                //     // dd($chapterOrder);
+                //     $participantChapter->syncCurricula(1);
+                //     // dd($participantChapter->participantCurricula());
+                // }
                 $chapterOrder++;
             }
 
@@ -122,27 +125,15 @@ class ParticipantController extends Controller
      */
     public function show(Participant $participant)
     {
+        // 現在のカリキュラムを取得
         $curriculum = $participant->currentCurriculum()?->curriculum;
 
+        // 次のカリキュラムを取得
         $nextCurriculum = $participant?->nextCurrentCurriculum();
         // dd($nextCurriculum);
 
+        // 前回の（直近で完了した）カリキュラムを取得
         $prevCurriculum = $participant->prevCurriculum()?->curriculum;
-
-        // if(!$nextCurriculum){
-        //     $nextChapter = $participant?->participantChapters()->orderBy('chapter_order')->first();
-        //     if($nextChapter){
-        //         $nextCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
-        //             ->where('curriculum_number', 1)
-        //             ->first();
-        //     }
-        // }
-
-        // if(!$curriculum){
-
-        // }
-        // dd($participant->currentCurriculum());
-        // dd($curriculum->checklist);
 
         return Inertia::render('Participant/Show',[
             'participant' => $participant,
@@ -157,45 +148,26 @@ class ParticipantController extends Controller
      */
     public function edit(Participant $participant)
     {
+        // コース一覧
         $courses = Course::with('chapters')->get();
 
-        $participantChapters = $participant->participantChapters()
-            ->with('chapter.course','participantCurricula.curriculum')
-            ->get()
-            ->flatMap(function ($pc) {
-                return $pc->participantCurricula->map(function($pcur) use ($pc){
-                    return [
-                        'chapter' => $pc->chapter,
-                        'curriculum' => $pcur->curriculum,
-                        'courseName' => $pc->chapter->course->name,
-                        'starting_date' => $pcur->starting_date,
-                        'completion_date' => $pcur->completion_date,
-                    ];
-                });
-            })
-            ;
-        // $participantCurricula = $participant->participantCurricula()
-        //     ->with('participantChapter.chapter.course','curriculum')
-        //     ->get()
-        //     ->map(fn ($pc) => [
-        //             'chapter' => $pc->participantChapter->chapter,
-        //             'curriculum' => $pc->curriculum,
-        //             'courseName' => $pc->participantChapter->chapter->course->name,
-        //             'starting_date' => $pc->starting_date,
-        //             'completion_date' => $pc->completion_date,
-        //     ]);
 
+        // Eagerロード
         $participant->load([
             'participantCurricula.curriculum',
             'participantCurricula.participantChapter.chapter',
             'participantChapters.chapter.course'
         ]);
 
+        $startedChapterIds = $participant
+            ->participantChapters()
+            ->whereNotNull('starting_date')
+            ->pluck('chapter_id');
+
         return Inertia::render('Participant/Edit', [
             'courses' => $courses,
             'participant' => $participant,
-            'participantChapters' => $participantChapters,
-            // 'curricula' => $participantcurricula,
+            'startedChapterIds' => $startedChapterIds,
         ]);
     }
 
@@ -207,36 +179,26 @@ class ParticipantController extends Controller
         // dd($request);
         DB::transaction(function () use ($participant, $request) {
 
+            // 登録されているチャプターID一覧
             $current = $participant->participantChapters()
                 ->pluck('chapter_id')
                 ->toArray();
 
+            // 更新するチャプターID一覧(リクエスト)
             $new = $request->chapters;
 
-            $add = array_diff($new, $current);
-            $delete = array_diff($current, $new);
+            // $add = array_diff($new, $current); // 追加するチャプターID一覧
+            $delete = array_diff($current, $new); // 削除するチャプターID一覧
 
-            // dd($current,$new,$add,$delete);
-
-            // dd($chapterOrder);
-            // 削除
+            // 削除するチャプターがある場合
             if ($delete) {
                 $participant->participantChapters()
                 ->whereIn('chapter_id', $delete)
                 ->delete();
                 }
 
-            // $chapterOrder = $participant->participantChapters()->latest('chapter_order')->first()->chapter_order ?? 0;
-            // 追加
-            // foreach ($add as $chapterId) {
-            //     $participant->participantChapters()->create([
-            //         'chapter_id' => $chapterId,
-            //         'chapter_order' => $chapterOrder + 1
-            //     ]);
-            //     $chapterOrder++;
-            // }
-
-            $this->updateOrder($request);
+            // チャプター順を追加・更新
+            $this->updateOrder($request,$participant->id);
 
             // if(!$participant->currentCurriculum()){
             //     $participant->startCurriculum();
@@ -253,19 +215,22 @@ class ParticipantController extends Controller
     {
         //
     }
-    private function updateOrder(UpdateParticipantRequest $request)
+    private function updateOrder(UpdateParticipantRequest $request, int $participantId)
     {
+        // dd($request);
+        // チャプター一覧
         $chapters = $request->chapters;
 
-        DB::transaction(function () use ($chapters) {
+        DB::transaction(function () use ($chapters, $participantId) {
 
             $cases = [];
             $ids = [];
 
             foreach ($chapters as $index => $chapter) {
 
-                $id = $chapter['id'];
-                $order = $index + 1;
+                // dd($index,$chapter);
+                $id = $chapter; // チャプターID
+                $order = $index + 1; // チャプター順
 
                 $cases[] = "WHEN {$id} THEN {$order}";
                 $ids[] = $id;
@@ -274,15 +239,17 @@ class ParticipantController extends Controller
             $ids = implode(',', $ids);
             $cases = implode(' ', $cases);
 
+            // 登録チャプターのチャプター順を追加更新
             DB::update("
-            UPDATE participant_chapters
-            SET chapter_order = CASE id
-                {$cases}
-            END
-            WHERE id IN ({$ids})
-        ");
+                UPDATE participant_chapters
+                SET chapter_order = CASE chapter_id
+                    {$cases}
+                END
+                WHERE participant_id = ?
+                AND chapter_id IN ({$ids})
+            ", [$participantId]);
         });
 
-        return back();
+        // return back();
     }
 }

@@ -22,42 +22,48 @@ const form = useForm({
     content: null,
     checklist: null,
 });
+
+// 使用コースID
 const selectedCourseId = ref(props.chapter?.course_id ?? null);
 
+// 使用コース選択時、チャプターIDを初期化（0に）する
 watch(selectedCourseId, () => {
     form.chapter_id = 0;
 });
 
+// 使用コースを取得
 const selectedCourse = computed<Course | null>(() => {
     return props.courses.find(
         c => c.id === Number(selectedCourseId.value)
     ) ?? null
 })
 
+// 使用コース内のチャプター一覧
 const filteredChapters = computed<Chapter[]>(() => {
     return selectedCourse.value?.chapters ?? [];
 });
 
-// const filteredChapters = computed<Chapter[]>(() => {
-//     const course = props.courses.find((c) => c.id === selectedCourseId.value);
-
-//     return course?.chapters ?? [];
-// });
-
+// 使用チャプター内のカリキュラム一覧
 const filteredCurricula = computed<Curriculum[]>(() => {
+    // チャプター一覧から使用チャプターを取得
     const chapter = filteredChapters.value.find(
         (c) => c.id === form.chapter_id,
     );
+    // 使用チャプター内のカリキュラム一覧を取得
     const curricula = chapter?.curricula ?? [];
+    // カリキュラム一覧の数+1をカリキュラム番号に入れる
     form.curriculum_number = curricula.length + 1
 
     return chapter?.curricula ?? [];
 });
 
+// 登録処理
 const storeCurriculum = () => {
+    // カリキュラムコードが未入力の場合
     if(form.curriculum_code === ""){
         const courseCode = selectedCourse.value?.course_code ?? ""
 
+        // (コースコード)-(チャプター番号)-(カリキュラム番号)
         form.curriculum_code = courseCode + '-' + form.chapter_id + '-' + form.curriculum_number
     }
     form.post('/curricula')
@@ -77,11 +83,8 @@ const storeCurriculum = () => {
                         class="text-sm leading-7 text-gray-600"
                         value="使用コース"
                     />
-                    <select
-                        name="course"
-                        id="course"
-                        v-model="selectedCourseId"
-                    >
+                    <!-- コース一覧セレクト -->
+                    <select name="course" id="course" v-model="selectedCourseId">
                         <option
                             v-for="c in courses"
                             :key="c.id"
@@ -98,13 +101,10 @@ const storeCurriculum = () => {
                     <InputLabel
                         for="chapter"
                         class="text-sm leading-7 text-gray-600"
-                        value="使用章"
+                        value="使用チャプター"
                     />
-                    <select
-                        name="chapter"
-                        id="chapter"
-                        v-model="form.chapter_id"
-                    >
+                    <!-- チャプター一覧セレクト -->
+                    <select name="chapter" id="chapter" v-model="form.chapter_id">
                         <option
                             v-for="c in filteredChapters"
                             :key="c.id"
@@ -116,6 +116,7 @@ const storeCurriculum = () => {
                     </select>
                 </div>
             </div>
+            <!-- カリキュラムリスト -->
             <CurriculumList :curricula="filteredCurricula" :show="false" />
             <div class="p-2">
                 <div class="relative">

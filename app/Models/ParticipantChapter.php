@@ -41,6 +41,8 @@ class ParticipantChapter extends Model
     //         'current_participant_curriculum_id'
     //     );
     // }
+
+    // 登録チャプター内の1番目のカリキュラムを取得
     public function firstCurriculum()
     {
         // dd($this);
@@ -48,36 +50,20 @@ class ParticipantChapter extends Model
         // dd($chapter);
         return $chapter->curricula()->where('curriculum_number',1)->first();
     }
-    public function syncCurricula(int $number)
-    {
-        $curriculum = $this->chapter->curricula->where('curriculum_number', $number)->firstOrFail();
+    
+    // public function syncCurricula(int $number)
+    // {
+    //     $curriculum = $this->chapter->curricula->where('curriculum_number', $number)->firstOrFail();
 
-        // dd($curricula);
-        // dd($this->id);
-        $this->participantCurricula()->firstOrCreate(
-            [
-                'curriculum_id' => $curriculum->id
-            ],
-            [
-                'starting_date' => now(),
-            ]
-        );
-
-    }
-    public function scopeIncomplete(Builder $query)
-    {
-        return $query->whereNull('completion_date');
-    }
-
-    /**
-     * 章完了判定
-     */
-    public function isCompleted(): bool
-    {
-        return $this->participantCurricula()
-            ->where('completion_date', null)
-            ->doesntExist();
-    }
-
+    //     // dd($curricula);
+    //     // dd($this->id);
+    //     $this->participantCurricula()->firstOrCreate(
+    //         [
+    //             'curriculum_id' => $curriculum->id
+    //         ],
+    //         [
+    //             'starting_date' => now(),
+    //         ]
+    //     );
 
 }

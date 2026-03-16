@@ -1,3 +1,4 @@
+// カリキュラム
 export type Curriculum = {
     id: number,
     name: string,
@@ -7,6 +8,7 @@ export type Curriculum = {
     checklist: string,
 }
 
+// チャプター(章)
 export type Chapter = {
     id: number;
     name: string;
@@ -16,6 +18,7 @@ export type Chapter = {
     course?:Course
 };
 
+// コース
 export type Course = {
     id:number
     name:string
@@ -23,28 +26,34 @@ export type Course = {
     chapters:Chapter[]
 }
 
+// 受講者
 export type Participant = {
     id: number
     name: string
 };
 
+// 一覧画面で使用
 export type ParticipantWithRelations = Participant & {
     participant_chapters: ParticipantChapter[];
     participant_curricula: ParticipantCurriculum[];
 };
 
+// チャプターリストで使用
 export type ChapterWithCourseName = Chapter & {
     courseName: string;
     isStarting?: boolean;
     completion_date?: date;
 };
 
+// 受講者の登録チャプター
 export type ParticipantChapter = {
+    starting_date:date
     completion_date:date
     chapter: Chapter
     participantCurricula:ParticipantCurriculum[]
 }
 
+// 受講者が受けた課題
 export type ParticipantCurriculum = {
     starting_date:date
     completion_date:date
@@ -52,14 +61,14 @@ export type ParticipantCurriculum = {
     participant_chapter:ParticipantChapter
 }
 
-export type EditChapterWithCourseName = ChapterWithCourseName & {
-    chapter_order:number
-}
+// export type EditChapterWithCourseName = ChapterWithCourseName & {
+//     chapter_order:number
+// }
 
-export type CurriculumWithCourseName = {
-    chapter:Chapter
-    curriculum: Curriculum
-    courseName:string
-    starting_date:date
-    completion_date:date
-}
+// export type CurriculumWithCourseName = {
+//     chapter:Chapter
+//     curriculum: Curriculum
+//     courseName:string
+//     starting_date:date
+//     completion_date:date
+// }

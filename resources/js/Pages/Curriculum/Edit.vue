@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SubmitButton from '@/Components/SubmitButton.vue';
 import SubTitle from '@/Components/SubTitle.vue';
-import TextInput from '@/Components/TextInput.vue';
 import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
 import { Chapter, Course, Curriculum } from '@/types/course';
 import { useForm } from '@inertiajs/vue3';
-import { onMounted, onUpdated } from 'vue';
 
 const props = defineProps<{
     curriculum:Curriculum,
@@ -28,11 +24,12 @@ const form = useForm({
     content:props.curriculum.name,
     checklist:props.curriculum.checklist
 })
+// サブタイトル
 const subtitle = props.course.name + "(" + props.course.course_code + ")" + "　" + props.chapter.name
 
-onUpdated(() => {
-    console.log(form.errors)
-})
+// onUpdated(() => {
+//     console.log(form.errors)
+// })
 </script>
 
 <template>

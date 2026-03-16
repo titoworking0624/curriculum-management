@@ -28,11 +28,11 @@ const props = withDefaults(
               <th v-if="show" class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">詳細</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">順番</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">課題番号</th>
-              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">コース名</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">カリキュラム名</th>
             </tr>
           </thead>
           <tbody>
-              <tr v-for="c in curricula" :class="{'bg-yellow-400':c.id === props.id}">
+              <tr v-for="c in curricula" :class="{'bg-yellow-400':c.id === props.id}"><!-- 現在選択中のカリキュラムを表示 -->
                   <td v-if="show" class="px-4 py-3">
                       <PrimaryButton :href="route('curricula.show',{curriculum:c.id})">詳細</PrimaryButton>
                   </td>

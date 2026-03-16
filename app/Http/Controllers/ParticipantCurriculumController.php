@@ -23,22 +23,25 @@ class ParticipantCurriculumController extends Controller
         // dd($participant);
         DB::transaction(function () use($participant) {
 
+            // 現在の課題を取得
             $current = $participant->currentCurriculum();
 
             if (!$current) {
                 return response()->json(['message' => 'No curriculum'], 404);
             }
 
+            // 現在の課題を完了させる（完了日を登録）
             $current->update([
                 'completion_date' => now()
                 ]);
 
+            // チャプター内に次のカリキュラムがあるか確認（isLastCurriculumと同じなので後で合わせる）
             $next = Curriculum::where('chapter_id', $current->curriculum->chapter_id)
                 ->where('curriculum_number', $current->curriculum->curriculum_number + 1)
                 ->first();
 
             if(!$next){
-                // 次の curriculum がない = chapter 完了
+                // 次のカリキュラムがない = チャプター完了
                 $this->completeChapter($current->participant_chapter_id);
             }
             // if ($next) {
@@ -49,7 +52,7 @@ class ParticipantCurriculumController extends Controller
                 //     'starting_date' => now()
                 // ]);
             // }else{
-            //     // 次の curriculum がない = chapter 完了
+            //     // 次のカリキュラムがない = chapter 完了
             //     $this->completeChapter($current->participant_chapter_id);
             // }
 
@@ -61,13 +64,15 @@ class ParticipantCurriculumController extends Controller
      */
     private function completeChapter($participantChapterId)
     {
+        // 登録チャプターを取得
         $participantChapter = ParticipantChapter::find($participantChapterId);
 
+        // 登録チャプターを完了させる（完了日を登録）
         $participantChapter->update([
             'completion_date' => now()
         ]);
 
-        // 次の chapter
+        // 次のチャプター
         $nextChapter = ParticipantChapter::where('participant_id', $participantChapter->participant_id)
             ->where('chapter_order', $participantChapter->chapter_order + 1)
             ->first();
@@ -77,10 +82,10 @@ class ParticipantCurriculumController extends Controller
             return; // 全course完了
         }
 
-        // 次の chapter 開始
-        $nextChapter->update([
-            'starting_date' => now()
-        ]);
+        // // 次の chapter 開始
+        // $nextChapter->update([
+        //     'starting_date' => now()
+        // ]);
 
         // // その chapter の curriculum1開始
         // $firstCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
@@ -103,26 +108,27 @@ class ParticipantCurriculumController extends Controller
     {
         DB::transaction(function () use ($participant) {
 
+            // 現在の課題を取得
             $current = $participant->currentCurriculum();
 
-            // 直前に完了した curriculum
+            // 直前に完了したカリキュラム
             $prev = $participant->prevCurriculum();
 
             if(!$prev){
                 return;
             }
 
-            // 次の curriculum が作られている場合は削除
+            // 課題が作られている場合は削除
             if($current){
                 $current->delete();
             }
 
-            // curriculum 完了を取り消し
+            // 課題完了を取り消し
             $prev->update([
                 'completion_date' => null
             ]);
 
-            // chapter が完了していた場合は戻す
+            // チャプターが完了していた場合は戻す
             $chapter = $prev->participantChapter;
 
             if ($chapter->completion_date) {
@@ -132,7 +138,7 @@ class ParticipantCurriculumController extends Controller
             }
 
             });
-        return response()->json(['success' => true]);
+        return redirect()->back();
     }
     /**
      * 課題スタート処理
@@ -141,15 +147,20 @@ class ParticipantCurriculumController extends Controller
     {
         DB::transaction(function() use ($participant){
 
+            // 登録チャプター内に未開始のカリキュラムが存在しない場合
             if($participant->isLastCurriculum()){
+                // 次の登録チャプターを開始し、その中の1番目のカリキュラムを開始
                 $participant->startCurriculum();
             }else{
+                // 直近完了したカリキュラムを取得
                 $prev = $participant->prevCurriculum();
 
+                // 登録チャプター内で次のカリキュラムを取得
                 $next = Curriculum::where('chapter_id', $prev->curriculum->chapter_id)
                     ->where('curriculum_number', $prev->curriculum->curriculum_number + 1)
                     ->first();
 
+                // 課題にカリキュラムを登録
                 ParticipantCurriculum::create([
                     'participant_chapter_id' => $prev->participant_chapter_id,
                     'curriculum_id' => $next->id,
@@ -159,23 +170,32 @@ class ParticipantCurriculumController extends Controller
         });
         return redirect()->back();
     }
+    /**
+     * 課題を停止する
+     */
     public function stopCurriculum(Participant $participant)
     {
         DB::transaction(function() use ($participant){
+            // 現在の課題を取得
             $current = $participant->currentCurriculum();
 
             if (!$current) {
                 return response()->json(['message' => 'No curriculum'], 404);
             }
-            // dd($current);
+
+            // チャプター内で1番目のカリキュラムであった場合
             if($current->isFirstCurriculum()){
-                // dd($participant->currentChapter());
+                // 登録チャプターを未開始にする(開始日をnullにする)
                 $participant->currentChapter()->update([
                     'starting_date' => null,
                 ]);
             }
 
+            // 現在の課題を削除
             $current->delete();
+
+            // 登録チャプター内でカリキュラムが存在しない場合登録チャプターの開始日をnullにする
+            $participant->chapterInNullCurriculum();
         });
         return redirect()->back();
     }

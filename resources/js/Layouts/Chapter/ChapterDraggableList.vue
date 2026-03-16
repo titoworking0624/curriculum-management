@@ -1,14 +1,11 @@
+<!-- 入れ替え可能なチャプターリスト -->
 <script setup lang="ts">
-import CreateButton from '@/Components/CreateButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import HeadLayout from '@/Layouts/HeadLayout.vue';
-import ListLayout from '@/Layouts/ListLayout.vue';
-import { Chapter, Curriculum } from '@/types/course';
-import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Chapter } from '@/types/course';
+import { VueElement } from 'vue';
 import draggableComponent from 'vuedraggable';
 
+// 親から受け取ったモデル
 const listchapters = defineModel<Chapter[]>()
 
 </script>
@@ -26,7 +23,6 @@ const listchapters = defineModel<Chapter[]>()
           <draggableComponent v-model="listchapters" tag="tbody" itemKey="id" handle=".cursor-move" animation="200"
             ghost-class="opacity-40"
             chosen-class="bg-yellow-100"
-
             :force-fallback="true"
             :fallback-on-body="true"
             :delay="50"
@@ -41,7 +37,12 @@ const listchapters = defineModel<Chapter[]>()
                       </td>
                   </tr>
               </template>
-          </draggableComponent>
+            </draggableComponent>
+            <tbody v-if="!listchapters || listchapters.length === 0">
+                <tr>
+                    <td class="px-4 py-3" colspan="4">チャプターなし</td>
+                </tr>
+            </tbody>
         </table>
 
 </template>

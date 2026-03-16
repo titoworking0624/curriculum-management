@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SubmitButton from '@/Components/SubmitButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import ChapterDraggableList from '@/Layouts/Chapter/ChapterDraggableList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
 import { Chapter, Course } from '@/types/course';
@@ -16,8 +14,10 @@ const props = defineProps<{
     errors:object,
 }>()
 
+// コース内チャプターID一覧
 const chaptersId = props.chapters.map(c => ({id:c.id}))
 
+// チャプター一覧リスト
 const listChapters = ref([...props.chapters]);
 
 const form = useForm({
@@ -27,6 +27,7 @@ const form = useForm({
     chapters:chaptersId,
 })
 
+// リスト内順番更新
 const updateFormOrder = () =>{
     form.chapters = listChapters.value.map(c => ({
         id:c.id
@@ -54,6 +55,7 @@ const updateFormOrder = () =>{
           </div>
           <div class="p-2 w-full">
             <div class="relative">
+                <!-- 入れ替え可能なチャプターリスト -->
                 <ChapterDraggableList
                     v-model="listChapters"
                     @end="updateFormOrder"/>

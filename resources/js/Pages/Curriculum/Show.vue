@@ -1,16 +1,10 @@
 <script setup lang="ts">
 import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
-import SubmitButton from '@/Components/SubmitButton.vue';
 import SubTitle from '@/Components/SubTitle.vue';
-import TextInput from '@/Components/TextInput.vue';
-import ChapterList from '@/Layouts/Chapter/ChapterList.vue';
 import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
 import { Chapter, Course, Curriculum } from '@/types/course';
-import { useForm } from '@inertiajs/vue3';
-import { nl2br } from "@/common";
 import CopyButton from '@/Components/CopyButton.vue';
 
 const props = defineProps<{
@@ -19,15 +13,6 @@ const props = defineProps<{
     course:Course,
 }>()
 
-// const form = useForm({
-//     id:props.curriculum.id,
-//     chapter_id:props.curriculum.chapter_id,
-//     curriculum_number:props.curriculum.curriculum_number,
-//     curriculum_code:props.curriculum.curriculum_code,
-//     name:props.curriculum.name,
-//     content:props.curriculum.content,
-//     checklist:props.curriculum.checklist
-// })
 const subtitle = props.course.name + "　" + props.chapter.name
 </script>
 
@@ -64,6 +49,7 @@ const subtitle = props.course.name + "　" + props.chapter.name
             <div class="relative">
                 <div class="flex h-10">
                     <InputLabel class="leading-7 text-sm text-gray-600 mt-auto" value="内容"/>
+                    <!-- クリックすると内容がコピーされるボタン -->
                     <CopyButton v-if="curriculum" :text="curriculum.content" class="ml-auto mt-1 mr-4">コピー</CopyButton>
                 </div>
                 <div class="h-32 w-full resize-none rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-6 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 whitespace-pre-line">{{ curriculum.content }}</div>
@@ -76,7 +62,7 @@ const subtitle = props.course.name + "　" + props.chapter.name
             </div>
           </div>
         </div>
-                <CurriculumList class="mt-8" :curricula="props.chapter.curricula" :id="curriculum.id"/>
-
+        <!-- カリキュラムリスト -->
+        <CurriculumList class="mt-8" :curricula="props.chapter.curricula" :id="curriculum.id"/>
     </FormLayout>
 </template>

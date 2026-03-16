@@ -1,16 +1,13 @@
+<!-- チャプター一覧リスト -->
 <script setup lang="ts">
-import CreateButton from '@/Components/CreateButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
-import HeadLayout from '@/Layouts/HeadLayout.vue';
-import ListLayout from '@/Layouts/ListLayout.vue';
 import { Chapter } from '@/types/course';
-import { Head } from '@inertiajs/vue3';
 
 withDefaults(
     defineProps<{
         chapters:Chapter[],
-        show?: boolean;
+        show?: boolean; // 詳細ボタンなどがいるかどうかのフラグ
     }>(),
     {
         show: true,
@@ -24,8 +21,8 @@ withDefaults(
           <thead>
             <tr>
               <th v-if="show" class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">詳細</th>
-              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">章番号</th>
-              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">章名</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">チャプター番号</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">チャプター名</th>
               <th v-if="show" class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">編集</th>
             </tr>
           </thead>
@@ -39,7 +36,9 @@ withDefaults(
                   <td v-if="show" class="px-4 py-3">
                       <SecondaryButton :href="route('chapters.edit',{chapter:c.id})" v-if="show">編集</SecondaryButton>
                   </td>
-
+              </tr>
+              <tr v-if="chapters.length === 0">
+                <td class="px-4 py-3" colspan="4">登録チャプターなし</td>
               </tr>
           </tbody>
         </table>
