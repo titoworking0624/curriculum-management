@@ -4,16 +4,17 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SubTitle from '@/Components/SubTitle.vue';
 import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
-import { Chapter, Course, Curriculum } from '@/types/course';
+import { Chapter, Course, Curriculum, ShowCurriculum } from '@/types/course';
 import CopyButton from '@/Components/CopyButton.vue';
 
 const props = defineProps<{
-    curriculum:Curriculum,
+    curriculum:ShowCurriculum,
     chapter:Chapter,
-    course:Course,
+    // course?:Course,
 }>()
 
-const subtitle = props.course.name + "　" + props.chapter.name
+const subtitle = props.curriculum.chapter.course.name + "　" + props.curriculum.chapter.name
+// const subtitle = props.course.name + "　" + props.chapter.name
 </script>
 
 <template>
@@ -63,6 +64,6 @@ const subtitle = props.course.name + "　" + props.chapter.name
           </div>
         </div>
         <!-- カリキュラムリスト -->
-        <CurriculumList class="mt-8" :curricula="props.chapter.curricula" :id="curriculum.id"/>
+        <CurriculumList class="mt-8" :curricula="chapter.curricula" :id="curriculum.id"/>
     </FormLayout>
 </template>

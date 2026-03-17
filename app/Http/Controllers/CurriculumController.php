@@ -77,15 +77,19 @@ class CurriculumController extends Controller
      */
     public function show(Curriculum $curriculum)
     {
+        $curriculum->load([
+            'chapter.course'
+        ]);
+
         $chapter = $curriculum->chapter()->with('curricula')->first();
-        $course = $chapter->course()->first();
+        // $course = $chapter->course()->first();
 
         // dd($chapter);
 
         return Inertia::render('Curriculum/Show', [
             'curriculum' => $curriculum,
             'chapter' => $chapter,
-            'course' => $course,
+            // 'course' => $course,
         ]);
     }
 

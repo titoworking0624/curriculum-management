@@ -25,7 +25,7 @@ withDefaults(
             </tr>
         </thead>
         <tbody>
-            <tr v-for="c in curricula" :key="c.curriculum.id">
+            <tr v-for="c in curricula" :key="c.curriculum.id" :class="{'bg-yellow-300':!c.completion_date}">
                 <td class="px-4 py-3">{{c.curriculum.curriculum_code}}</td>
                 <td class="px-4 py-3">{{c.curriculum.name}}</td>
                 <!-- 開始 -->

@@ -19,7 +19,7 @@ defineProps({
         <span>{{ title }}</span>
     </h1>
     </div>
-    <div class="lg:w-2/3 w-full mx-auto">
+    <div class="lg:w-3/4 w-full mx-auto">
         <slot />
     </div>
   </div>

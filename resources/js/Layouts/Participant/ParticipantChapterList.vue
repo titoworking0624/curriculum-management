@@ -25,12 +25,11 @@ const listChapters = defineModel<ChapterWithCourseName[]>()
     <table class="table-auto w-full text-left whitespace-no-wrap">
         <thead>
             <tr>
-                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">ソート</th>
-                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">順番</th>
-                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">チャプター(章)名</th>
-                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">章番号</th>
+                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"></th>
+                <!-- <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">順番</th> -->
                 <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">コース名</th>
-                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">詳細</th>
+                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">チャプター(章)名</th>
+                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">完了日</th>
                 <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">削除</th>
             </tr>
         </thead>
@@ -46,34 +45,29 @@ const listChapters = defineModel<ChapterWithCourseName[]>()
         >
             <!-- 開始済みチャプターリスト -->
             <template #header v-if="fixedChapters">
-                <tr v-for="(chapter,index) in props.fixedChapters"
+                <tr v-for="(chapter,index) in props.fixedChapters" :class="{'bg-yellow-300':!chapter.completion_date}"
                     :key="chapter.id"
                     class="bg-gray-100"
                 >
-                    <td class="px-4 py-3">×</td>
-                    <td class="px-4 py-3">{{index + 1}}</td>
+                    <td class="px-4 pr-0 py-3"></td>
+                    <!-- <td class="px-4 py-3">{{index + 1}}</td> -->
+                    <td class="px-4 py-3">{{chapter.courseName}}({{chapter.chapter_number}})</td>
                     <td class="px-4 py-3">{{chapter.name}}</td>
-                    <td class="px-4 py-3">{{chapter.chapter_number}}</td>
-                    <td class="px-4 py-3">{{chapter.courseName}}</td>
-                    <td class="px-4 py-3">
-                        <PrimaryButton :href="route('chapters.show',{chapter:chapter.id})">詳細</PrimaryButton>
-                    </td>
-                    <td class="px-4 py-3"></td>
+                    <td v-if="chapter.completion_date" class="px-4 py-3" colspan="2">{{chapter.completion_date}}</td>
+                    <td v-else class="px-4 py-3 text-gray-400" colspan="2">現在のチャプター</td>
+                    <!-- <td v-if="chapter.completion_date" class="px-4 py-3 text-gray-400">完</td> -->
                 </tr>
             </template>
             <!-- 未開始入れ替え可能チャプターリスト -->
             <template #item="{element,index}">
                 <tr>
                     <!-- 入れ替え可能タグ -->
-                    <td class="cursor-move px-4 py-3">☰</td>
+                    <td class="cursor-move px-4 pr-0 py-3">☰</td>
                     <!-- 開始済みから数えた順番 -->
-                    <td class="px-4 py-3">{{index + (fixedChapters?.length ?? 0) + 1}}</td>
+                    <!-- <td class="px-4 py-3">{{index + (fixedChapters?.length ?? 0) + 1}}</td> -->
+                    <td class="px-4 py-3">{{element.courseName}}({{element.chapter_number}})</td>
                     <td class="px-4 py-3">{{element.name}}</td>
-                    <td class="px-4 py-3">{{element.chapter_number}}</td>
-                    <td class="px-4 py-3">{{element.courseName}}</td>
-                    <td class="px-4 py-3">
-                        <PrimaryButton :href="route('chapters.show',{chapter:element.id})">詳細</PrimaryButton>
-                    </td>
+                    <td></td>
                     <!-- 未開始の場合削除ボタン -->
                     <td v-if="!element.isStarting" class="px-4 py-3">
                         <button @click="removeChapter(element.id)" class="text-red-500 hover:text-red-700">×</button>

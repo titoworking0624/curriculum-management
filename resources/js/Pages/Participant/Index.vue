@@ -19,6 +19,9 @@ defineProps({
     <ListLayout title="受講者一覧">
     <CreateButton :href="route('participants.create')">受講者登録</CreateButton>
 
+        <div class="flex flex-col text-center w-full my-6">
+            <h2 class="mx-auto sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">送信済み</h2>
+        </div>
         <table class="table-auto w-full text-left whitespace-no-wrap">
           <thead>
             <tr>
@@ -43,7 +46,7 @@ defineProps({
           </tbody>
         </table>
         <div class="flex flex-col text-center w-full my-6">
-            <h2 class="mx-auto sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">課題未送信</h2>
+            <h2 class="mx-auto sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">未送信</h2>
         </div>
         <table class="table-auto w-full text-left whitespace-no-wrap">
           <thead>
@@ -71,7 +74,7 @@ defineProps({
           </tbody>
         </table>
         <div class="flex flex-col text-center w-full my-6">
-            <h2 class="mx-auto sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">課題未開始</h2>
+            <h2 class="mx-auto sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">カリキュラム未開始</h2>
         </div>
         <table class="table-auto w-full text-left whitespace-no-wrap">
           <thead>

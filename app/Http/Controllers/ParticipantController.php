@@ -154,20 +154,42 @@ class ParticipantController extends Controller
 
         // Eagerロード
         $participant->load([
+            'participantCurricula' => function ($q) {
+                $q->latest('starting_date')
+                    ->latest('id');
+            },
             'participantCurricula.curriculum',
             'participantCurricula.participantChapter.chapter',
             'participantChapters.chapter.course'
         ]);
 
-        $startedChapterIds = $participant
-            ->participantChapters()
-            ->whereNotNull('starting_date')
-            ->pluck('chapter_id');
+        // // 開始済みのチャプターID一覧取得
+        // $startedChapterIds = $participant
+        //     ->participantChapters()
+        //     ->whereNotNull('starting_date')
+        //     ->pluck('chapter_id');
+
+        $currentCurriculum = $participant->currentCurriculum()?->load([
+            'curriculum',
+            'participantChapter.chapter',
+        ]);
+        // 前回の（直近で完了した）カリキュラムを取得
+        $prevCurriculum = $participant->prevCurriculum()?->load([
+            'curriculum',
+            'participantChapter.chapter',
+        ]);
+        // 次の課題取得
+        $nextCurriculum = $participant->nextCurrentCurriculum()?->load([
+            'chapter.course',
+        ]);
 
         return Inertia::render('Participant/Edit', [
             'courses' => $courses,
             'participant' => $participant,
-            'startedChapterIds' => $startedChapterIds,
+            // 'startedChapterIds' => $startedChapterIds,
+            'currentCurriculum' => $currentCurriculum,
+            'nextCurriculum' => $nextCurriculum,
+            'prevCurriculum' => $prevCurriculum,
         ]);
     }
 
@@ -239,6 +261,7 @@ class ParticipantController extends Controller
             $ids = implode(',', $ids);
             $cases = implode(' ', $cases);
 
+            // dd($ids,$cases);
             // 登録チャプターのチャプター順を追加更新
             DB::update("
                 UPDATE participant_chapters

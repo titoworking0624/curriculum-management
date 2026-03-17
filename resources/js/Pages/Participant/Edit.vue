@@ -1,5 +1,6 @@
 <!-- 受講者編集画面 -->
 <script setup lang="ts">
+import CancelButton from '@/Components/CancelButton.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import ChapterDropdown from '@/Components/Participant/ChapterDropdown.vue';
@@ -7,15 +8,19 @@ import CourseDropdown from '@/Components/Participant/CourseDropdown.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SubmitButton from '@/Components/SubmitButton.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
+import CurrrentCurriculumList from '@/Layouts/Participant/CurrrentCurriculumList.vue';
 import ParticipantChapterList from '@/Layouts/Participant/ParticipantChapterList.vue';
 import ParticipantCurriculaList from '@/Layouts/Participant/ParticipantCurriculaList.vue';
-import { ChapterWithCourseName, Course, ParticipantWithRelations } from '@/types/course';
-import { useForm } from '@inertiajs/vue3';
+import { ChapterWithCourseName, Course, NextCurriculum, ParticipantCurriculum, ParticipantWithRelations } from '@/types/course';
+import { router, useForm } from '@inertiajs/vue3';
 import { computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
     courses: Course[];
     participant:ParticipantWithRelations,
+    currentCurriculum:ParticipantCurriculum | null;
+    prevCurriculum:ParticipantCurriculum | null;
+    nextCurriculum:NextCurriculum | null;
     errors: Object;
 }>();
 
@@ -24,6 +29,7 @@ const form = useForm({
     name: props.participant.name,
 });
 
+const state = ref<string>()
 // 開始済みのチャプターID一覧
 // const initialChapterIds = new Set(
 //   props.participant.participant_curricula
@@ -45,6 +51,8 @@ const allChapters = computed<ChapterWithCourseName[]>(() =>
       ...ch,
       courseName: course.name,
       isStarting: initialChapterIds.value.has(ch.id),
+    //   starting_date: props.participant.participant_chapters
+    //     .find(c => c.chapter.id === ch.id)?.starting_date,
       completion_date: props.participant.participant_chapters
         .find(c => c.chapter.id === ch.id)?.completion_date
     }))
@@ -83,6 +91,16 @@ onMounted(() => {
   // 未開始のチャプター一覧
   draggableChapters.value =
     chapters.filter(c => !c.isStarting)
+
+  if(props.currentCurriculum){
+    state.value = "課題進捗：" + "課題取り組み中"
+  }else if(!props.nextCurriculum){
+    state.value = "課題進捗：" + "課題未登録"
+  }else if(props.prevCurriculum){
+    state.value = "課題進捗：" + "課題提出完了"
+  }else{
+    state.value = "課題進捗：" + "次課題未スタート"
+  }
 
 })
 
@@ -160,14 +178,10 @@ const updateParticipant = () => {
         @submit.prevent="updateParticipant"
         class="-m-2 flex flex-col"
         >
-        <div class="p-2">
+        <div class="p-2 w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200">
             <div class="relative">
-                <div class="flex">
-                    <InputLabel
-                    for="name"
-                        class="text-sm leading-7 text-gray-600"
-                        value="受講者名"
-                    />
+                <div class="flex mt-2">
+                    <h3 class="block font-medium text-gray-700 ml-2">受講者名</h3>
                     <PrimaryButton class="ml-auto mb-2" :href="route('participants.show',{participant:participant.id})">課題確認</PrimaryButton>
                 </div>
                 <input
@@ -180,56 +194,76 @@ const updateParticipant = () => {
                 <InputError :message="form.errors.name" />
             </div>
         </div>
-        <div class="p-2">
+        <div class="p-2 w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 my-2">
             <div class="relative">
-                <InputLabel
-                    :label="false"
-                    class="text-sm leading-7 text-gray-600"
-                    value="受講カリキュラム"
-                />
+                <div class="flex my-3">
+                    <h3 class="block font-medium text-gray-700 ml-2">{{ state }}</h3>
+                    <template v-if="props.currentCurriculum">
+                        <div class="ml-auto">
+                            <PrimaryButton class="mr-2" :href="route('participants.show',{participant:participant.id})">課題確認</PrimaryButton>
+                            <CancelButton @click="router.patch(route('stopCurriculum',{participant:props.participant.id}))" class="mr-auto">課題停止</CancelButton>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <div class="ml-auto">
+                            <PrimaryButton v-if="props.nextCurriculum"
+                                @click="router.patch(route('startCurriculum',{participant:props.participant.id}))" class="mr-2">課題スタート</PrimaryButton>
+                            <CancelButton v-if="props.prevCurriculum"
+                                @click="router.patch(route('cancelComplete',{participant:props.participant.id}))" class="mr-auto">提出完了キャンセル</CancelButton>
+                        </div>
+                    </template>
+                </div>
                 <!-- 課題一覧 -->
-                <!-- 2026-03-16 開始日降順でソートしたほうがいいかも -->
-                <ParticipantCurriculaList :curricula="props.participant.participant_curricula"
-                    class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200" />
+                <CurrrentCurriculumList
+                    :curricula="props.participant.participant_curricula"
+                    :currentCurriculum="props.currentCurriculum"
+                    :nextCurriculum="props.nextCurriculum"
+                    :prevCurriculum="props.prevCurriculum"/>
             </div>
         </div>
-            <div class="flex h-16 justify-between mb-4">
-                <div class="relative ms-3 flex w-full">
-                    <div>
-                        <InputLabel :label="false"
-                            class="text-sm leading-7 text-gray-600 mr-4"
-                        >コース選択</InputLabel>
-                        <!-- コース内チャプター全リスト追加 -->
-                        <CourseDropdown :courses="courses" @selectCourse="handleSelectCourse"/>
-                    </div>
-                    <div class="relative flex ml-auto mr-4">
+
+        <div class="p-2 w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 my-2">
+            <div class="flex justify-between my-2 flex-col" >
+                <h3 class="block font-medium text-gray-700 ml-2">受講チャプター</h3>
+                <div class="mt-2">
+                    <h4 class="text-sm leading-7 block font-medium text-gray-700 ml-2">チャプター追加</h4>
+                    <div class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 flex">
                         <div>
                             <InputLabel :label="false"
+                            class="text-sm leading-7 text-gray-600 mr-4"
+                            >コース選択</InputLabel>
+                            <!-- コース内チャプター全リスト追加 -->
+                            <CourseDropdown :courses="courses" @selectCourse="handleSelectCourse"/>
+                        </div>
+                        <div class="relative flex ml-auto mr-4">
+                            <div>
+                                <InputLabel :label="false"
                                 class="text-sm leading-7 text-gray-600 mr-4"
-                            >コース内チャプター追加</InputLabel>
-                            <!-- 選択チャプターのコース選択 -->
-                            <select
+                                >コース内チャプター追加</InputLabel>
+                                <!-- 選択チャプターのコース選択 -->
+                                <select
                                 name="course"
                                 id="course"
                                 v-model="selectedCourseId"
                                 class="mr-2"
-                            >
-                                <option :value="null"></option>
-                                <option
-                                    v-for="c in courses"
-                                    :key="c.id"
-                                    :value="c.id"
                                 >
-                                    {{ c.course_code }}：{{ c.name }}
-                                </option>
-                            </select>
-                        </div>
-                        <div>
-                             <InputLabel :label="false"
+                                    <option :value="null"></option>
+                                    <option
+                                        v-for="c in courses"
+                                        :key="c.id"
+                                        :value="c.id"
+                                    >
+                                        {{ c.course_code }}：{{ c.name }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div>
+                                <InputLabel :label="false"
                                 class="text-sm leading-7 text-gray-600 mr-4"
-                            >チャプター選択</InputLabel>
-                            <!-- チャプターリスト追加 -->
-                            <ChapterDropdown :courses="selectedCourses" @selectChapter="handleSelectChapter"/>
+                                >チャプター選択</InputLabel>
+                                <!-- チャプターリスト追加 -->
+                                <ChapterDropdown :courses="selectedCourses" @selectChapter="handleSelectChapter"/>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -237,21 +271,35 @@ const updateParticipant = () => {
             <div class="p-2">
                 <div class="relative">
                     <InputLabel
-                        :label="false"
-                        class="text-sm leading-7 text-gray-600"
-                        value="受講チャプター"
+                    :label="false"
+                    class="text-sm leading-7 text-gray-600"
+                    value="チャプターリスト"
                     />
                     <!-- 登録チャプター一覧 -->
                     <ParticipantChapterList
-                        v-model="draggableChapters"
-                        :fixedChapters="fixedChapters"
-                        @removeChapter="removeChapter"
-                        class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200" />
+                    v-model="draggableChapters"
+                    :fixedChapters="fixedChapters"
+                    @removeChapter="removeChapter"
+                    class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200" />
                 </div>
             </div>
-            <div class="w-full p-2">
-                <SubmitButton class="mx-auto mt-8">更新する</SubmitButton>
+        </div>
+        <div class="p-2 w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 my-2">
+            <div class="relative">
+                <h3 class="block font-medium leading-7  text-gray-700 my-2">受講カリキュラム履歴</h3>
+                <!-- <InputLabel
+                    :label="false"
+                    class="text-sm leading-7 text-gray-600"
+                    value="受講カリキュラム"
+                /> -->
+                <!-- 課題一覧 -->
+                <ParticipantCurriculaList :curricula="props.participant.participant_curricula"
+                    class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 mb-2" />
             </div>
-        </form>
-    </FormLayout>
+        </div>
+        <div class="w-full p-2">
+            <SubmitButton class="mx-auto mt-8">更新する</SubmitButton>
+        </div>
+    </form>
+</FormLayout>
 </template>
