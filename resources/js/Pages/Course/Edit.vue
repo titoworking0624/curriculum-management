@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SubmitButton from '@/Components/SubmitButton.vue';
+import SubTitle from '@/Components/SubTitle.vue';
 import ChapterDraggableList from '@/Layouts/Chapter/ChapterDraggableList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
 import { Chapter, Course } from '@/types/course';
@@ -39,6 +41,9 @@ const updateFormOrder = () =>{
 <template>
     <FormLayout title="コース編集">
         <form @submit.prevent="form.put(route('courses.update',{course:form.id}))" class="flex flex-col -m-2">
+            <div class="relative flex w-full">
+                <PrimaryButton class="ml-auto" :href="route('courses.index')">コース一覧へ戻る</PrimaryButton>
+            </div>
           <div class="p-2">
             <div class="relative">
                 <InputLabel for="code" class="leading-7 text-sm text-gray-600" value="コースコード(英字2文字)" />
@@ -55,6 +60,9 @@ const updateFormOrder = () =>{
           </div>
           <div class="p-2 w-full">
             <div class="relative">
+                <div class="flex mt-12">
+                    <h3 class="inline-flex font-medium text-gray-700 ml-2 items-end">コース内チャプター一覧</h3>
+                </div>
                 <!-- 入れ替え可能なチャプターリスト -->
                 <ChapterDraggableList
                     v-model="listChapters"

@@ -27,6 +27,7 @@ const props = defineProps<{
 const form = useForm({
     chapters:[] as number[],
     name: props.participant.name,
+    email:props.participant.email,
 });
 
 const state = ref<string>()
@@ -192,6 +193,19 @@ const updateParticipant = () => {
                     class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
                 />
                 <InputError :message="form.errors.name" />
+            </div>
+            <div class="relative">
+                <div class="flex mt-2">
+                    <h3 class="block font-medium text-gray-700 ml-2">メールアドレス</h3>
+                </div>
+                <input
+                    type="text"
+                    id="email"
+                    name="email"
+                    v-model="form.email"
+                    class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
+                />
+                <InputError :message="form.errors.email" />
             </div>
         </div>
         <div class="p-2 w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 my-2">

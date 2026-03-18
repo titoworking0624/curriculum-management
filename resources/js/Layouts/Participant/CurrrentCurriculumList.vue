@@ -52,32 +52,6 @@ const prev = props.curricula.filter(c => c.completion_date)
                     </tbody>
                 </table>
             </template>
-            <template v-else-if="prevCurriculum">
-                <InputLabel
-                    :label="false"
-                    class="text-sm leading-7 text-gray-600 py-1 px-1"
-                    value="完了した最新の課題"
-                />
-                <table class="table-auto w-full text-left whitespace-no-wrap rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200">
-                        <thead>
-                            <tr>
-                                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">コード</th>
-                                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">カリキュラム名</th>
-                                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">開始日</th>
-                                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">完了日</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr :key="prevCurriculum.id">
-                                <td class="px-4 py-3">{{prevCurriculum.curriculum.curriculum_code}}</td>
-                                <td class="px-4 py-3">{{prevCurriculum.curriculum.name}}</td>
-                                <!-- 開始 -->
-                                <td class="px-4 py-3">{{prevCurriculum.starting_date}}</td>
-                                <td class="px-4 py-3">{{prevCurriculum.completion_date}}</td>
-                            </tr>
-                        </tbody>
-                </table>
-            </template>
 
             <InputLabel
             :label="false"
@@ -111,6 +85,33 @@ const prev = props.curricula.filter(c => c.completion_date)
                     </tr>
                 </template>
             </table>
+            <template v-if="prevCurriculum && !currentCurriculum">
+                <InputLabel
+                    :label="false"
+                    class="text-sm leading-7 text-gray-600 py-1 px-1"
+                    value="完了した最新の課題"
+                />
+                <table class="table-auto w-full text-left whitespace-no-wrap rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">コード</th>
+                                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">カリキュラム名</th>
+                                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">開始日</th>
+                                <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">完了日</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr :key="prevCurriculum.id">
+                                <td class="px-4 py-3">{{prevCurriculum.curriculum.curriculum_code}}</td>
+                                <td class="px-4 py-3">{{prevCurriculum.curriculum.name}}</td>
+                                <!-- 開始 -->
+                                <td class="px-4 py-3">{{prevCurriculum.starting_date}}</td>
+                                <td class="px-4 py-3">{{prevCurriculum.completion_date}}</td>
+                            </tr>
+                        </tbody>
+                </table>
+            </template>
+
         </div>
     </div>
 

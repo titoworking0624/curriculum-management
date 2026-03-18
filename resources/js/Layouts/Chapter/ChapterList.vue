@@ -4,13 +4,15 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import { Chapter } from '@/types/course';
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         chapters:Chapter[],
         show?: boolean; // 詳細ボタンなどがいるかどうかのフラグ
+        id?:number,
     }>(),
     {
         show: true,
+        id:0,
     },
 );
 
@@ -27,7 +29,7 @@ withDefaults(
             </tr>
           </thead>
           <tbody>
-              <tr v-for="c in chapters" :key="c.id">
+              <tr v-for="c in chapters" :key="c.id" :class="{'bg-yellow-400':c.id === props.id}">
                   <td v-if="show" class="px-4 py-3">
                       <PrimaryButton :href="route('chapters.show',{chapter:c.id})">詳細</PrimaryButton>
                   </td>

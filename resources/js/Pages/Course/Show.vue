@@ -25,6 +25,10 @@ const title = props.course.name + "(" + props.course.course_code + ")"
             <CreateButton :href="route('chapters.create',{course_id: props.course.id})">章登録</CreateButton>
         </div>
         <ChapterList :chapters="props.chapters" />
+        <div class="flex mt-12">
+            <PrimaryButton class="mx-auto" :href="route('courses.index')">コース一覧へ戻る</PrimaryButton>
+        </div>
+
     </ListLayout>
 
 </template>

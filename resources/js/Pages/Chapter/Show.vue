@@ -28,6 +28,9 @@ const decoration = props.course.name + "(" + props.chapter.chapter_number + ")"
         </div>
         <!-- カリキュラムリスト -->
         <CurriculumList :curricula="props.curricula" />
+        <div class="flex mt-12">
+            <PrimaryButton class="mx-auto" :href="route('courses.show',{course:props.course.id})">チャプター一覧へ戻る</PrimaryButton>
+        </div>
     </ListLayout>
 
 </template>

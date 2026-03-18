@@ -23,6 +23,7 @@ class StoreParticipantRequest extends FormRequest
     {
         return [
             'name' => ['required','string'],
+            'email' => ['required', 'string'],
         ];
     }
 }

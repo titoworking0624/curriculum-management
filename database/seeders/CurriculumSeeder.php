@@ -50,5 +50,21 @@ class CurriculumSeeder extends Seeder
                 'checklist' => '・チェックリスト1・チェックリスト2',
             ],
         ]);
+        Chapter::findOrFail(2)->curricula()->createMany([
+            [
+                'curriculum_number' => 1,
+                'curriculum_code' => 'co-2-1',
+                'name' => 'コーディングスピードを上げる',
+                'content' => 'コーディングスピードを上げるの内容',
+                'checklist' => '・チェックリスト1・チェックリスト2',
+            ],
+            [
+                'curriculum_number' => 2,
+                'curriculum_code' => 'co-2-2',
+                'name' => 'CSSをもっと便利に書くための準備と練習',
+                'content' => 'CSSをもっと便利に書くための準備と練習の内容',
+                'checklist' => '・チェックリスト1・チェックリスト2',
+            ],
+        ]);
     }
 }

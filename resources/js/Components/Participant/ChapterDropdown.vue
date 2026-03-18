@@ -37,7 +37,7 @@ const selectChapter = (chapter:ChapterWithCourseName) => {
                 <div v-if="!flatChapters.length" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none">チャプターが存在していません</div>
                 <div v-for="c in flatChapters" :key="c.id" @click="selectChapter(c)"
                     class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none">
-                    {{ c.courseName }}{{ c.chapter_number }}章： {{ c.name }}
+                    {{ c.chapter_number }}： {{ c.name }}
                 </div>
             </div>
         </template>

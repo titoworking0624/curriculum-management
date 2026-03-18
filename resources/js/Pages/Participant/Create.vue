@@ -25,6 +25,7 @@ const selectedCourseId = ref<number | null>(null)
 const form = useForm({
     chapters:selectedChapters,
     name: null,
+    email: null,
 });
 
 // チャプター一覧のコース選択
@@ -103,6 +104,23 @@ const storeParticipant = () => {
                     class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
                 />
                 <InputError :message="form.errors.name" />
+            </div>
+        </div>
+        <div class="p-2">
+            <div class="relative">
+                <InputLabel
+                for="email"
+                    class="text-sm leading-7 text-gray-600"
+                    value="メールアドレス"
+                />
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    v-model="form.email"
+                    class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
+                />
+                <InputError :message="form.errors.email" />
             </div>
         </div>
             <div class="flex h-16 justify-between mb-4">

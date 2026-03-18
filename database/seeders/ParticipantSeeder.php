@@ -18,6 +18,7 @@ class ParticipantSeeder extends Seeder
             [
                 'id' => 1,
                 'name' => '伊藤貴幸',
+                'email' => 'test@test.com',
             ],
         ]);
     }

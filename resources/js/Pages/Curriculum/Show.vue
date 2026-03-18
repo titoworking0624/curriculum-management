@@ -6,6 +6,7 @@ import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
 import { Chapter, Course, Curriculum, ShowCurriculum } from '@/types/course';
 import CopyButton from '@/Components/CopyButton.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 
 const props = defineProps<{
     curriculum:ShowCurriculum,
@@ -64,6 +65,10 @@ const subtitle = props.curriculum.chapter.course.name + "　" + props.curriculum
           </div>
         </div>
         <!-- カリキュラムリスト -->
-        <CurriculumList class="mt-8" :curricula="chapter.curricula" :id="curriculum.id"/>
+         <div class="flex mt-12">
+            <h3 class="inline-flex font-medium text-gray-700 ml-2 items-end">チャプター内カリキュラム一覧</h3>
+            <PrimaryButton class="ml-auto" :href="route('chapters.show',{chapter:props.chapter.id})">カリキュラム一覧へ戻る</PrimaryButton>
+         </div>
+        <CurriculumList class="mt-4" :curricula="chapter.curricula" :id="curriculum.id"/>
     </FormLayout>
 </template>

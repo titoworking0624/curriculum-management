@@ -31,6 +31,7 @@ export type Course = {
 export type Participant = {
     id: number
     name: string
+    email: string
 };
 
 // 一覧画面で使用

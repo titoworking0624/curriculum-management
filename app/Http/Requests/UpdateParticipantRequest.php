@@ -23,6 +23,7 @@ class UpdateParticipantRequest extends FormRequest
     {
         return [
             'name' => ['required','string'],
+            'email' => ['required','string'],
             'chapters' => ['array'],
             'chapters.*' => ['exists:chapters,id'],
         ];

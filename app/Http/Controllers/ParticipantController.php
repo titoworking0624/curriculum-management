@@ -90,7 +90,8 @@ class ParticipantController extends Controller
         DB::transaction(function () use ($request) {
             // 受講者を登録
             $participant = Participant::create([
-                'name' => $request->name
+                'name' => $request->name,
+                'email' => $request->email,
             ]);
 
             // チャプター一覧
@@ -199,6 +200,7 @@ class ParticipantController extends Controller
     public function update(UpdateParticipantRequest $request, Participant $participant)
     {
         // dd($request);
+        // 2026-03-18 カリキュラム開始日完了日編集入れてもいいかも
         DB::transaction(function () use ($participant, $request) {
 
             // 登録されているチャプターID一覧

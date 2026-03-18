@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SubmitButton from '@/Components/SubmitButton.vue';
 import SubTitle from '@/Components/SubTitle.vue';
 import CurriculumList from '@/Layouts/Curriculum/CurriculumList.vue';
@@ -77,6 +78,10 @@ const subtitle = props.course.name + "(" + props.course.course_code + ")" + "　
             <SubmitButton class="mx-auto mt-8">更新する</SubmitButton>
           </div>
         </form>
-        <CurriculumList class="mt-8" :curricula="props.chapter.curricula" :id="form.id"/>
+        <div class="flex mt-12">
+            <h3 class="inline-flex font-medium text-gray-700 ml-2 items-end">チャプター内カリキュラム一覧</h3>
+            <PrimaryButton class="ml-auto" :href="route('chapters.show',{chapter:props.chapter.id})">カリキュラム一覧へ戻る</PrimaryButton>
+         </div>
+        <CurriculumList class="mt-4" :curricula="props.chapter.curricula" :id="form.id"/>
     </FormLayout>
 </template>
