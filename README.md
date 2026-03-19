@@ -1,4 +1,10 @@
-git clone (URL)
+<p>
+セットアップ
+git clone https://github.com/titoworking0624/curriculum-management.git
+cd curriculum-management
+
+.env.example -> .env
+
 composer install
 php artisan key:generate
 
@@ -8,8 +14,6 @@ php artisan key:generate
 ./vendor/bin/sail artisan db:seed
 
 sail npm run dev
-
-
 </p>
 
 ## About Laravel
