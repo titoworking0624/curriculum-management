@@ -1,5 +1,6 @@
 <p>
 セットアップ
+    
 - git clone https://github.com/titoworking0624/curriculum-management.git
 - cd curriculum-management
 
