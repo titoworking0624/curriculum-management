@@ -83,6 +83,7 @@ class Participant extends Model
         // 現在の課題か完了している場合は一つ前の課題を取得
         $current = $this->currentCurriculum() ?? $this->prevCurriculum();
 
+        // dd($current->participantChapter->chapter_id);
         if($current){
             $nextCurriculum = Curriculum::where('chapter_id', $current->participantChapter->chapter_id) // 現在のチャプター内
                 ->where('curriculum_number', $current->curriculum->curriculum_number + 1) // 現在のカリキュラムの次が存在するか
