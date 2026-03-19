@@ -18,14 +18,14 @@ class ParticipantCurriculaSeeder extends Seeder
         DB::table('participant_curricula')->insert([
             [
                 'id' => 1,
-                'participant_chapter_id' => 2,
+                'participant_chapter_id' => 1,
                 'curriculum_id' => 1,
                 'starting_date' => now()->addday(-1),
                 'completion_date' => now(),
             ],
             [
                 'id' => 2,
-                'participant_chapter_id' => 2,
+                'participant_chapter_id' => 1,
                 'curriculum_id' => 2,
                 'starting_date' => now(),
                 'completion_date' => null,
