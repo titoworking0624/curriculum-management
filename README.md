@@ -1,19 +1,19 @@
 <p>
 セットアップ
-git clone https://github.com/titoworking0624/curriculum-management.git
-cd curriculum-management
+- git clone https://github.com/titoworking0624/curriculum-management.git
+- cd curriculum-management
 
-.env.example -> .env
+- .env.example -> .env
 
-composer install
-php artisan key:generate
+- composer install
+- php artisan key:generate
 
-./vendor/bin/sail up -d
-./vendor/bin/sail npm install
-./vendor/bin/sail artisan migrate
-./vendor/bin/sail artisan db:seed
+- ./vendor/bin/sail up -d
+- ./vendor/bin/sail npm install
+- ./vendor/bin/sail artisan migrate
+- ./vendor/bin/sail artisan db:seed
 
-sail npm run dev
+- sail npm run dev
 </p>
 
 ## About Laravel
