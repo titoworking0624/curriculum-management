@@ -14,7 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
-        ]);
+        ])
+        // ログインしないと遷移出来ないページがないため
+        ->redirectGuestsTo(fn() => route('login'))
+        // ログイン後は一覧ページへ遷移させる
+        ->redirectUsersTo(fn() => route('index'));
 
         //
     })

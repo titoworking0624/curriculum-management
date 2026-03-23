@@ -23,6 +23,9 @@ class User extends Authenticatable
         'password',
     ];
 
+    protected $casts = [
+        'is_admin' => 'boolean',
+    ];
     /**
      * The attributes that should be hidden for serialization.
      *

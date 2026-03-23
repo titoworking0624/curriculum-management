@@ -5,6 +5,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import SubmitButton from '@/Components/SubmitButton.vue';
 
 const form = useForm({
     name: '',
@@ -14,7 +15,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('register'), {
+    form.post(route('admin.users'), {
         onFinish: () => {
             form.reset('password', 'password_confirmation');
         },
@@ -102,13 +103,13 @@ const submit = () => {
                     Already registered?
                 </Link>
 
-                <PrimaryButton
+                <SubmitButton
                     class="ms-4"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >
                     Register
-                </PrimaryButton>
+                </SubmitButton>
             </div>
         </form>
     </GuestLayout>
