@@ -84,12 +84,12 @@ class Participant extends Model
         $current = $this->currentCurriculum() ?? $this->prevCurriculum();
 
         // dd($current->participantChapter->chapter_id);
-        if($current){
+        $nextCurriculum = null;
+        // 現在のチャプターが完了していなかったら
+        if($current && !$current->participantChapter->completion_date){
             $nextCurriculum = Curriculum::where('chapter_id', $current->participantChapter->chapter_id) // 現在のチャプター内
                 ->where('curriculum_number', $current->curriculum->curriculum_number + 1) // 現在のカリキュラムの次が存在するか
                 ->first();
-        }else{ // 課題が未開始の場合
-            $nextCurriculum = null;
         }
         // dd($this->nextCurriculum());
         // dd($nextCurriculum);
@@ -194,5 +194,36 @@ class Participant extends Model
                 ]);
             }
         }
+    }
+    /**
+     * 開始しているチャプターを返す
+     */
+    public function isStartChapter()
+    {
+        $currentChapter =
+            $this->participantChapters()
+                ->whereNotNull('starting_date')
+                ->whereNull('completion_date')
+                ->latest('chapter_order')
+                ->first();
+
+        if(!$currentChapter) return false;
+
+        return $currentChapter;
+    }
+    /**
+     * Edit用Eagerロード
+     */
+    public function participantInEdit()
+    {
+        return $this->load([
+            'participantCurricula' => function ($q) {
+                $q->latest('starting_date')
+                    ->latest('id');
+            },
+            'participantCurricula.curriculum',
+            'participantCurricula.participantChapter.chapter',
+            'participantChapters.chapter.course'
+        ]);
     }
 }

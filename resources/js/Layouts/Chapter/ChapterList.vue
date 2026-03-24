@@ -25,7 +25,7 @@ const props = withDefaults(
               <th v-if="show" class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">詳細</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">チャプター番号</th>
               <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">チャプター名</th>
-              <th v-if="show" class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">編集</th>
+              <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">編集</th>
             </tr>
           </thead>
           <tbody>
@@ -35,8 +35,8 @@ const props = withDefaults(
                   </td>
                   <td class="px-4 py-3">{{c.chapter_number}}</td>
                   <td class="px-4 py-3">{{c.name}}</td>
-                  <td v-if="show" class="px-4 py-3">
-                      <SecondaryButton :href="route('chapters.edit',{chapter:c.id})" v-if="show">編集</SecondaryButton>
+                  <td class="px-4 py-3">
+                      <SecondaryButton :href="route('chapters.edit',{chapter:c.id})" v-if="c.id !== props.id">編集</SecondaryButton>
                   </td>
               </tr>
               <tr v-if="chapters.length === 0">

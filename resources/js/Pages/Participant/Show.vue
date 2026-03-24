@@ -6,15 +6,15 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SubTitle from '@/Components/SubTitle.vue';
 import FormLayout from '@/Layouts/FormLayout].vue';
-import { Curriculum, Participant } from '@/types/course';
+import { Curriculum, Participant, ParticipantCurriculum } from '@/types/course';
 import { router } from '@inertiajs/vue3';
 
 const props =
     defineProps<{
         participant:Participant;
-        curriculum:Curriculum | null;
+        participantCurriculum:ParticipantCurriculum | null;
         nextCurriculum:Curriculum | null;
-        prevCurriculum:Curriculum | null;
+        prevCurriculum:ParticipantCurriculum | null;
     }>()
 
 // 課題完了
@@ -46,6 +46,8 @@ const startCurriculum = () => {
     router.patch(route('startCurriculum',{participant:props.participant.id}))
 }
 
+const curriculum = props.participantCurriculum?.curriculum
+
 const title = props.participant.name + " - " + "現在の課題"
 const subtitle = props.participant.name
 </script>
@@ -68,6 +70,39 @@ const subtitle = props.participant.name
                     </div>
                     <CopyButton :text="participant.email" class="ml-auto mt-1 mr-4">コピー</CopyButton>
                 </div>
+                <div class="font-medium title-font py-2 pl-2 text-gray-900 flex">
+                    <p v-if="participantCurriculum" class="inline-flex items-center pb-2">課題送信日</p>
+                    <div v-if="participantCurriculum" class=" bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out mx-4">
+                        {{ participantCurriculum.starting_date }}
+                    </div>
+                </div>
+                <div v-if="prevCurriculum" class="font-medium title-font py-2 pl-2 text-gray-900 flex flex-col">
+                    <p class="inline-flex items-center pb-2">前回課題</p>
+                    <div class="flex">
+                        <div>
+                            <p class="inline-flex items-center pb-2">コース</p>
+                            <div class=" bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out mx-4">
+                                {{ prevCurriculum.curriculum.chapter.course.name }}
+                            </div>
+                        </div>
+                        <div>
+                            <p class="inline-flex items-center pb-2">チャプター名</p>
+                            <div class=" bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out mx-4">
+                                {{ prevCurriculum.curriculum.chapter.name }}
+                            </div>
+                        </div>
+                        <div>
+                            <p class="inline-flex items-center pb-2">課題名</p>
+                            <div class=" bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out mx-4">
+                                {{ prevCurriculum.curriculum.name }}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="inline-flex items-center pb-2">完了日</p>
+                    <div class=" bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out mx-4">
+                        {{ prevCurriculum.starting_date }}
+                    </div>
+                </div>
             </div>
           </div>
 
@@ -79,6 +114,15 @@ const subtitle = props.participant.name
                         <InputLabel class="leading-7 text-sm text-gray-600" value="カリキュラムコード" />
                         <div class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                             <span v-if="curriculum">{{ curriculum.curriculum_code }}　</span>
+                            <span v-else>カリキュラムなし</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-2">
+                    <div class="relative">
+                        <InputLabel class="leading-7 text-sm text-gray-600" value="カリキュラム名" />
+                        <div class="w-full bg-gray-100 bg-opacity-50 rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                            <span v-if="curriculum">{{ curriculum.chapter.name }}　</span>
                             <span v-else>カリキュラムなし</span>
                         </div>
                     </div>
@@ -146,7 +190,7 @@ const subtitle = props.participant.name
                 <!-- 直近の完了した課題がある場合 -->
                  <template v-else>
                      <div v-if="prevCurriculum" class="flex flex-col mr-auto">
-                         <span>{{ prevCurriculum.curriculum_code }}:{{ prevCurriculum.name }}</span>
+                         <span>{{ prevCurriculum.curriculum.curriculum_code }}:{{ prevCurriculum.curriculum.name }}</span>
                          <!-- 直近の完了した課題を現在の課題にする(完了日をnullにする) -->
                          <CancelButton @click="cancelCurriculum" class="mr-auto">提出完了キャンセル</CancelButton>
                      </div>

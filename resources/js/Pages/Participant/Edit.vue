@@ -52,8 +52,8 @@ const allChapters = computed<ChapterWithCourseName[]>(() =>
       ...ch,
       courseName: course.name,
       isStarting: initialChapterIds.value.has(ch.id),
-    //   starting_date: props.participant.participant_chapters
-    //     .find(c => c.chapter.id === ch.id)?.starting_date,
+      starting_date: props.participant.participant_chapters
+        .find(c => c.chapter.id === ch.id)?.starting_date,
       completion_date: props.participant.participant_chapters
         .find(c => c.chapter.id === ch.id)?.completion_date
     }))
@@ -113,6 +113,41 @@ const removeChapter = (chapterId:number) => {
     draggableChapters.value.filter(c => c.id !== chapterId)
 
 }
+
+const cancelComplete = () => {
+    router.patch(route('cancelComplete',{participant:props.participant.id}),{},{
+        onSuccess:()=>{
+            router.visit(route('participants.edit', props.participant.id), {
+                replace: true
+            })
+        }
+    })
+}
+
+const endChapter = () => {
+    router.patch(route('endChapter',{participant:props.participant.id}), {}, {
+        onSuccess: () => {
+            router.visit(route('participants.edit', props.participant.id), {
+                replace: true
+            })
+        }
+    })
+}
+
+const cancelEndChapter = (chapterId:number) => {
+    const participantChapter = props.participant.participant_chapters.find(c => c.chapter.id === chapterId)
+    const id = participantChapter?.['id']
+    // console.log(id)
+    router.patch(route('cancelEndChapter',{chapterId:id}), {}, {
+        onSuccess: () => {
+            router.visit(route('participants.edit', props.participant.id), {
+                replace: true
+            })
+        }
+    })
+}
+
+
 
 // 選択したコースのチャプター一覧を全てチャプターリストに追加
 const handleSelectCourse = (id:number) => {
@@ -223,7 +258,7 @@ const updateParticipant = () => {
                             <PrimaryButton v-if="props.nextCurriculum"
                                 @click="router.patch(route('startCurriculum',{participant:props.participant.id}))" class="mr-2">課題スタート</PrimaryButton>
                             <CancelButton v-if="props.prevCurriculum"
-                                @click="router.patch(route('cancelComplete',{participant:props.participant.id}))" class="mr-auto">提出完了キャンセル</CancelButton>
+                                @click="cancelComplete" class="mr-auto">提出完了キャンセル</CancelButton>
                         </div>
                     </template>
                 </div>
@@ -294,6 +329,8 @@ const updateParticipant = () => {
                     v-model="draggableChapters"
                     :fixedChapters="fixedChapters"
                     @removeChapter="removeChapter"
+                    @endChapter="endChapter"
+                    @cancelEndChapter="cancelEndChapter"
                     class="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200" />
                 </div>
             </div>

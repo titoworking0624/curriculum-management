@@ -33,7 +33,7 @@ const prev = props.curricula.filter(c => c.completion_date)
             <table class="table-auto w-full text-left whitespace-no-wrap rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200">
                     <thead>
                         <tr>
-                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">コード</th>
+                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl">チャプター名</th>
                             <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">カリキュラム名</th>
                             <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">開始日</th>
                             <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">確認</th>
@@ -41,7 +41,7 @@ const prev = props.curricula.filter(c => c.completion_date)
                     </thead>
                     <tbody>
                         <tr :key="currentCurriculum.id">
-                            <td class="px-4 py-3">{{currentCurriculum.curriculum.curriculum_code}}</td>
+                            <td class="px-4 py-3">{{currentCurriculum.participant_chapter.chapter.name}}({{ currentCurriculum.curriculum.curriculum_number }})</td>
                             <td class="px-4 py-3">{{currentCurriculum.curriculum.name}}</td>
                             <!-- 開始 -->
                             <td class="px-4 py-3">{{currentCurriculum.starting_date}}</td>
@@ -70,7 +70,7 @@ const prev = props.curricula.filter(c => c.completion_date)
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="px-4 py-3">{{nextCurriculum.chapter.name}}</td>
+                            <td class="px-4 py-3">{{nextCurriculum.chapter.name}}({{ nextCurriculum.curriculum_number }})</td>
                             <td class="px-4 py-3">{{nextCurriculum.curriculum_code}}</td>
                             <td class="px-4 py-3">{{nextCurriculum.name}}</td>
                             <td class="px-4 py-3">

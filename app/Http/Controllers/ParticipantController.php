@@ -127,18 +127,22 @@ class ParticipantController extends Controller
     public function show(Participant $participant)
     {
         // 現在のカリキュラムを取得
-        $curriculum = $participant->currentCurriculum()?->curriculum;
+        $participantCurriculum = $participant->currentCurriculum()?->load([
+            'curriculum.chapter',
+        ]);
 
         // 次のカリキュラムを取得
         $nextCurriculum = $participant?->nextCurrentCurriculum();
         // dd($nextCurriculum);
 
         // 前回の（直近で完了した）カリキュラムを取得
-        $prevCurriculum = $participant->prevCurriculum()?->curriculum;
+        $prevCurriculum = $participant->prevCurriculum()?->load([
+            'curriculum.chapter.course'
+        ]);
 
         return Inertia::render('Participant/Show',[
             'participant' => $participant,
-            'curriculum' => $curriculum,
+            'participantCurriculum' => $participantCurriculum,
             'nextCurriculum' => $nextCurriculum,
             'prevCurriculum' => $prevCurriculum,
         ]);
