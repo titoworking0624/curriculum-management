@@ -114,6 +114,24 @@ const removeChapter = (chapterId:number) => {
 
 }
 
+const startCurriculum = () => {
+    router.patch(route('startCurriculum',{participant:props.participant.id}),{},{
+        onSuccess:()=>{
+            router.visit(route('participants.edit', props.participant.id), {
+                replace: true
+            })
+        }
+    })
+}
+const stopCurriculum = () => {
+    router.patch(route('stopCurriculum',{participant:props.participant.id}),{},{
+        onSuccess:()=>{
+            router.visit(route('participants.edit', props.participant.id), {
+                replace: true
+            })
+        }
+    })
+}
 const cancelComplete = () => {
     router.patch(route('cancelComplete',{participant:props.participant.id}),{},{
         onSuccess:()=>{
@@ -250,13 +268,13 @@ const updateParticipant = () => {
                     <template v-if="props.currentCurriculum">
                         <div class="ml-auto">
                             <PrimaryButton class="mr-2" :href="route('participants.show',{participant:participant.id})">課題確認</PrimaryButton>
-                            <CancelButton @click="router.patch(route('stopCurriculum',{participant:props.participant.id}))" class="mr-auto">課題停止</CancelButton>
+                            <CancelButton @click="stopCurriculum" class="mr-auto">課題停止</CancelButton>
                         </div>
                     </template>
                     <template v-else>
                         <div class="ml-auto">
                             <PrimaryButton v-if="props.nextCurriculum"
-                                @click="router.patch(route('startCurriculum',{participant:props.participant.id}))" class="mr-2">課題スタート</PrimaryButton>
+                                @click="startCurriculum" class="mr-2">課題スタート</PrimaryButton>
                             <CancelButton v-if="props.prevCurriculum"
                                 @click="cancelComplete" class="mr-auto">提出完了キャンセル</CancelButton>
                         </div>

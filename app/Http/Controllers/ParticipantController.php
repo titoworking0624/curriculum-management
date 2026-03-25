@@ -249,35 +249,21 @@ class ParticipantController extends Controller
         // チャプター一覧
         $chapters = $request->chapters;
 
-        DB::transaction(function () use ($chapters, $participantId) {
+            $data = [];
 
-            $cases = [];
-            $ids = [];
-
-            foreach ($chapters as $index => $chapter) {
-
-                // dd($index,$chapter);
-                $id = $chapter; // チャプターID
-                $order = $index + 1; // チャプター順
-
-                $cases[] = "WHEN {$id} THEN {$order}";
-                $ids[] = $id;
+            foreach ($chapters as $index => $chapterId) {
+                $data[] = [
+                    'participant_id' => $participantId,
+                    'chapter_id' => $chapterId,
+                    'chapter_order' => $index + 1,
+                ];
             }
 
-            $ids = implode(',', $ids);
-            $cases = implode(' ', $cases);
-
-            // dd($ids,$cases);
-            // 登録チャプターのチャプター順を追加更新
-            DB::update("
-                UPDATE participant_chapters
-                SET chapter_order = CASE chapter_id
-                    {$cases}
-                END
-                WHERE participant_id = ?
-                AND chapter_id IN ({$ids})
-            ", [$participantId]);
-        });
+            DB::table('participant_chapters')->upsert(
+                $data,
+                ['participant_id', 'chapter_id'], // 一意キー
+                ['chapter_order'] // 更新対象
+            );
 
         // return back();
     }
