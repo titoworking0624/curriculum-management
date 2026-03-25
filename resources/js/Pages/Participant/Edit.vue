@@ -52,6 +52,8 @@ const allChapters = computed<ChapterWithCourseName[]>(() =>
       ...ch,
       courseName: course.name,
       isStarting: initialChapterIds.value.has(ch.id),
+      chapter_order: props.participant.participant_chapters
+        .find(c => c.chapter.id === ch.id)?.chapter_order,
       starting_date: props.participant.participant_chapters
         .find(c => c.chapter.id === ch.id)?.starting_date,
       completion_date: props.participant.participant_chapters
@@ -91,7 +93,9 @@ onMounted(() => {
 
   // 未開始のチャプター一覧
   draggableChapters.value =
-    chapters.filter(c => !c.isStarting)
+    [...chapters]
+        .filter(c => !c.isStarting)
+        .sort((a, b) => (a.chapter_order ?? 0) - (b.chapter_order ?? 0))
 
   if(props.currentCurriculum){
     state.value = "課題進捗：" + "課題取り組み中"
@@ -142,8 +146,10 @@ const cancelComplete = () => {
     })
 }
 
-const endChapter = () => {
-    router.patch(route('endChapter',{participant:props.participant.id}), {}, {
+const endChapter = (chapterId:number) => {
+    const participantChapter = props.participant.participant_chapters.find(c => c.chapter.id === chapterId)
+    const id = participantChapter?.['id']
+    router.patch(route('endChapter',{participant:props.participant.id,chapterId:id}), {}, {
         onSuccess: () => {
             router.visit(route('participants.edit', props.participant.id), {
                 replace: true
@@ -156,7 +162,7 @@ const cancelEndChapter = (chapterId:number) => {
     const participantChapter = props.participant.participant_chapters.find(c => c.chapter.id === chapterId)
     const id = participantChapter?.['id']
     // console.log(id)
-    router.patch(route('cancelEndChapter',{chapterId:id}), {}, {
+    router.patch(route('cancelEndChapter',{participant:props.participant.id,chapterId:id}), {}, {
         onSuccess: () => {
             router.visit(route('participants.edit', props.participant.id), {
                 replace: true

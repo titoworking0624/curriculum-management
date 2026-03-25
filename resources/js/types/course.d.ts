@@ -43,6 +43,7 @@ export type ParticipantWithRelations = Participant & {
 // チャプターリストで使用
 export type ChapterWithCourseName = Chapter & {
     courseName: string;
+    chapter_order?: number;
     isStarting?: boolean;
     starting_date?: date
     completion_date?: date;
@@ -51,7 +52,8 @@ export type ChapterWithCourseName = Chapter & {
 // 受講者の登録チャプター
 export type ParticipantChapter = {
     id:number
-    participant_id:number
+    participant_id: number
+    chapter_order:number
     starting_date:date
     completion_date:date
     chapter: Chapter

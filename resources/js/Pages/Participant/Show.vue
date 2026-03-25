@@ -43,7 +43,11 @@ const cancelCurriculum = () => {
 }
 // 課題スタート
 const startCurriculum = () => {
-    router.patch(route('startCurriculum',{participant:props.participant.id}))
+    router.patch(route('startCurriculum',{participant:props.participant.id}), {}, {
+        onSuccess: () => {
+            router.get(route('participants.show', props.participant.id))
+        }
+    })
 }
 
 const curriculum = props.participantCurriculum?.curriculum

@@ -147,8 +147,17 @@ class ParticipantCurriculumController extends Controller
     {
         DB::transaction(function() use ($participant){
 
+            if($participant->isChapterCorrect()){
+                $nextCurriculum = $participant->reStartWithPrevChapter();
+
+                ParticipantCurriculum::create([
+                    'participant_chapter_id' => $participant->currentChapter()->id,
+                    'curriculum_id' => $nextCurriculum->id,
+                    'starting_date' => now()
+                ]);
+            }
             // 登録チャプター内に未開始のカリキュラムが存在しない場合
-            if($participant->isLastCurriculum() || !$participant->isStartChapter()){
+            elseif($participant->isLastCurriculum() || !$participant->isStartChapter()){
                 // 次の登録チャプターを開始し、その中の1番目のカリキュラムを開始
                 $participant->startCurriculum();
             }else{
@@ -202,62 +211,68 @@ class ParticipantCurriculumController extends Controller
     /**
      * 現在のチャプターを強制完了する
      */
-    public function endChapter(Participant $participant)
+    public function endChapter(Participant $participant,int $chapterId)
     {
-        DB::transaction(function () use ($participant) {
+        DB::transaction(function () use ($chapterId, $participant) {
             $current = $participant->currentCurriculum();
 
             // 現在のチャプターを取得
-            $chapter = $participant->currentChapter();
-            // チャプター内で1番目のカリキュラムであった場合
-            if ($current?->isFirstCurriculum()) {
-                // チャプター順を取得
-                $order = $chapter->order;
-
-                // 現在の課題とチャプターを削除
-                $current->delete();
-                $chapter->delete();
-
-                // 登録チャプター順を繰り下げる
-                ParticipantChapter::where('participant_id', $participant->id)
-                    ->where('chapter_order','>',$order)
-                    ->decrement('chapter_order');
-            } else {
-                // 現在の課題を削除
-                $current?->delete();
-                // 現在のチャプターを完了させる
-                $chapter->update([
-                    'completion_date' => now(),
-                ]);
-                // $chapter->refresh();
-            }
+            $chapter = ParticipantChapter::findOrFail($chapterId);
+            // 現在の課題を削除
+            $current?->delete();
+            // 現在のチャプターを完了させる
+            // dd($chapter);
+            $chapter->update([
+                'completion_date' => now(),
+            ]);
+            // $chapter->refresh();
         });
         $participant->refresh()->load([
             'participantChapters',
             'participantCurricula',
-        ]);;
+        ]);
         return redirect()->back();
     }
     /**
      * 完了したチャプターを未完了にする
      */
-    public function cancelEndChapter(int $chapterId)
+    public function cancelEndChapter(Participant $participant, int $chapterId)
     {
         // dd($chapterId);
+        // 未完了にするチャプターを取得
         $chapter = ParticipantChapter::findOrFail($chapterId);
         // dd($chapter);
         if(!$chapter) return redirect()->back();
-        DB::transaction(function()use($chapter){
+        DB::transaction(function()use($chapter, $participant){
+            // 現在の課題を削除
+            $current = $participant->currentCurriculum();
+            $current?->delete();
+
+            // 現在のチャプターのカリキュラムが開始してなかった場合
+            $currentChapter = $participant->currentChapter();
+            if($currentChapter && !$currentChapter->isStartChapter()){
+                $currentChapter->update([
+                    'starting_date' => null,
+                ]);
+            }
+            // チャプターを未完了にする
             $chapter->update([
                 'completion_date' => null,
             ]);
+
+            // 未完了にしたチャプター内のカリキュラムを一つも完了していなかった場合、開始日のnullにする
+            if(!$chapter->isStartChapter()){
+                $chapter->update([
+                    'starting_date' => null,
+                ]);
+            }
             $chapter->refresh();
+
+            $participant->refresh()->load([
+                'participantChapters',
+                'participantCurricula',
+            ]);
         });
-        $participant = Participant::where('id',$chapter->participant_id)->first();
-        $participant = Participant::with([
-            'participantChapters',
-            'participantCurricula',
-        ])->find($participant->id);
 
         return redirect()->back();
     }

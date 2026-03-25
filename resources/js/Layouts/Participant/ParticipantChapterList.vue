@@ -79,7 +79,7 @@ const listChapters = defineModel<ChapterWithCourseName[]>()
                         <td class="px-4 py-3 text-gray-400">{{chapter.starting_date}}</td>
                         <td class="px-4 py-3">
                             <div class="flex">
-                                <CancelButton class="ml-auto" @click="endChapter">強制完了</CancelButton>
+                                <CancelButton class="ml-auto" @click="endChapter(chapter.id)">強制完了</CancelButton>
                             </div>
                         </td>
                     </template>

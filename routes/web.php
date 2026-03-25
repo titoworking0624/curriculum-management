@@ -52,8 +52,8 @@ Route::middleware('auth')->group(function(){
     Route::patch('/participants/{participant}/curriculum/cancel',[ParticipantCurriculumController::class, 'cancelComplete'])->name('cancelComplete');
     Route::patch('/participants/{participant}/curriculum/stop',[ParticipantCurriculumController::class, 'stopCurriculum'])->name('stopCurriculum');
     Route::patch('/participants/{participant}/curriculum/start',[ParticipantCurriculumController::class, 'startCurriculum'])->name('startCurriculum');
-    Route::patch('/participants/{participant}/endChapter',[ParticipantCurriculumController::class, 'endChapter'])->name('endChapter');
-    Route::patch('/participantChapters/{chapterId}/CancelEndChapter',[ParticipantCurriculumController::class, 'CancelEndChapter'])->name('cancelEndChapter');
+    Route::patch('/participants/{participant}/endChapter/{chapterId}',[ParticipantCurriculumController::class, 'endChapter'])->name('endChapter');
+    Route::patch('/participants/{participant}/cancelEndChapter/{chapterId}',[ParticipantCurriculumController::class, 'cancelEndChapter'])->name('cancelEndChapter');
 
     Route::resource('/courses', CourseController::class,['only' => ['index','create','store','edit','update','show']]);
     Route::resource('/chapters', ChapterController::class,['only' => ['create','store','show','edit','update']]);

@@ -50,7 +50,10 @@ class ParticipantChapter extends Model
         // dd($chapter);
         return $chapter->curricula()->where('curriculum_number',1)->first();
     }
-    
+    public function isStartChapter():bool
+    {
+        return $this->participantCurricula()->exists();
+    }
     // public function syncCurricula(int $number)
     // {
     //     $curriculum = $this->chapter->curricula->where('curriculum_number', $number)->firstOrFail();
