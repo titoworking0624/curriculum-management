@@ -6,6 +6,8 @@ use App\Models\Curriculum;
 use App\Models\Participant;
 use App\Models\ParticipantChapter;
 use App\Models\ParticipantCurriculum;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -18,18 +20,18 @@ class ParticipantCurriculumController extends Controller
     /**
      * 課題完了処理
      */
-    public function complete(Participant $participant)
+    public function complete(Participant $participant):JsonResponse|RedirectResponse
     {
         // dd($participant);
-        DB::transaction(function () use($participant) {
 
-            // 現在の課題を取得
-            $current = $participant->currentCurriculum();
+        // 現在の課題を取得
+        $current = $participant->currentCurriculum();
 
-            if (!$current) {
-                return response()->json(['message' => 'No curriculum'], 404);
+        if (!$current) {
+            return response()->json(['message' => 'No curriculum'], 404);
             }
 
+        DB::transaction(function () use($current) {
             // 現在の課題を完了させる（完了日を登録）
             $current->update([
                 'completion_date' => now()
@@ -56,13 +58,13 @@ class ParticipantCurriculumController extends Controller
             //     $this->completeChapter($current->participant_chapter_id);
             // }
 
-            return response()->json(['success' => true]);
         });
+        return response()->json(['success' => true]);
     }
     /**
      * 章(チャプター)完了処理
      */
-    private function completeChapter($participantChapterId)
+    private function completeChapter($participantChapterId):void
     {
         // 登録チャプターを取得
         $participantChapter = ParticipantChapter::find($participantChapterId);
@@ -72,15 +74,15 @@ class ParticipantCurriculumController extends Controller
             'completion_date' => now()
         ]);
 
-        // 次のチャプター
-        $nextChapter = ParticipantChapter::where('participant_id', $participantChapter->participant_id)
-            ->where('chapter_order', $participantChapter->chapter_order + 1)
-            ->first();
+        // // 次のチャプター
+        // $nextChapter = ParticipantChapter::where('participant_id', $participantChapter->participant_id)
+        //     ->where('chapter_order', $participantChapter->chapter_order + 1)
+        //     ->first();
 
-        // dd($nextChapter);
-        if (!$nextChapter) {
-            return; // 全course完了
-        }
+        // // dd($nextChapter);
+        // if (!$nextChapter) {
+        //     return; // 全course完了
+        // }
 
         // // 次の chapter 開始
         // $nextChapter->update([
@@ -104,20 +106,20 @@ class ParticipantCurriculumController extends Controller
     /**
      * 課題完了キャンセル処理
      */
-    public function cancelComplete(Participant $participant)
+    public function cancelComplete(Participant $participant) :RedirectResponse
     {
-        DB::transaction(function () use ($participant) {
 
-            // 現在の課題を取得
-            $current = $participant->currentCurriculum();
+        // 現在の課題を取得
+        $current = $participant->currentCurriculum();
 
-            // 直前に完了したカリキュラム
-            $prev = $participant->prevCurriculum();
+        // 直前に完了したカリキュラム
+        $prev = $participant->prevCurriculum();
 
-            if(!$prev){
-                return;
-            }
+        if(!$prev){
+            return redirect()->back();
+        }
 
+        DB::transaction(function () use ($current,$prev) {
             // 課題が作られている場合は削除
             if($current){
                 $current->delete();
@@ -136,20 +138,22 @@ class ParticipantCurriculumController extends Controller
                     'completion_date' => null
                 ]);
             }
-
-            });
+        });
         return redirect()->back();
     }
     /**
      * 課題スタート処理
      */
-    public function startCurriculum(Participant $participant)
+    public function startCurriculum(Participant $participant):RedirectResponse
     {
         DB::transaction(function() use ($participant){
 
-            if($participant->isChapterCorrect()){
+            // 現在のチャプターが直近完了した課題ではないか、開始済みのチャプターが複数ある場合
+            if($participant->isChapterCorrect() || $participant->startingChapterCount() >= 2){
+                // 次のカリキュラムを取得する
                 $nextCurriculum = $participant->reStartWithPrevChapter();
 
+                // 次の課題を作成する
                 ParticipantCurriculum::create([
                     'participant_chapter_id' => $participant->currentChapter()->id,
                     'curriculum_id' => $nextCurriculum->id,
@@ -182,16 +186,16 @@ class ParticipantCurriculumController extends Controller
     /**
      * 課題を停止する
      */
-    public function stopCurriculum(Participant $participant)
+    public function stopCurriculum(Participant $participant):JsonResponse|RedirectResponse
     {
-        DB::transaction(function() use ($participant){
-            // 現在の課題を取得
-            $current = $participant->currentCurriculum();
+        // 現在の課題を取得
+        $current = $participant->currentCurriculum();
 
-            if (!$current) {
-                return response()->json(['message' => 'No curriculum'], 404);
-            }
+        if (!$current) {
+            return response()->json(['message' => 'No curriculum'], 404);
+        }
 
+        DB::transaction(function() use ($participant,$current){
             // チャプター内で1番目のカリキュラムであった場合
             if($current->isFirstCurriculum()){
                 // 登録チャプターを未開始にする(開始日をnullにする)
@@ -205,13 +209,14 @@ class ParticipantCurriculumController extends Controller
 
             // 登録チャプター内でカリキュラムが存在しない場合登録チャプターの開始日をnullにする
             $participant->chapterInNullCurriculum();
+
         });
         return redirect()->back();
     }
     /**
      * 現在のチャプターを強制完了する
      */
-    public function endChapter(Participant $participant,int $chapterId)
+    public function endChapter(Participant $participant,int $chapterId):RedirectResponse
     {
         DB::transaction(function () use ($chapterId, $participant) {
             $current = $participant->currentCurriculum();
@@ -236,7 +241,7 @@ class ParticipantCurriculumController extends Controller
     /**
      * 完了したチャプターを未完了にする
      */
-    public function cancelEndChapter(Participant $participant, int $chapterId)
+    public function cancelEndChapter(Participant $participant, int $chapterId):RedirectResponse
     {
         // dd($chapterId);
         // 未完了にするチャプターを取得

@@ -16,7 +16,7 @@ const props = defineProps<{
 
 const form = useForm({
     course_id:props.course?.id ??null,
-    chapter_number:null,
+    chapter_number:1,
     name:null,
 })
 
@@ -25,8 +25,10 @@ const filteredChapters = computed(() => {
     const course = props.courses.find(
         c => c.id === form.course_id
     )
+    const chapters = course?.chapters ?? []
+    form.chapter_number = chapters.length + 1
 
-    return course?.chapters ?? []
+    return chapters
 })
 </script>
 

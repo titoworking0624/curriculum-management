@@ -25,4 +25,11 @@ class Chapter extends Model
     public function participantChapters(){
         return $this->hasMany(ParticipantChapter::class);
     }
+    /**
+     * チャプターの中にカリキュラムが存在しているか
+     */
+    public function isExistCurriculum() :bool
+    {
+        return $this->curricula()->exists();
+    }
 }

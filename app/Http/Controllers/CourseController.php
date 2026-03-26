@@ -96,9 +96,9 @@ class CourseController extends Controller
     {
         //
     }
-    private function updateOrder(UpdateCourseRequest $request)
+    private function updateOrder(UpdateCourseRequest $request):void
     {
-        dd($request);
+        // dd($request);
         $chapters = $request->chapters;
 
         DB::transaction(function () use ($chapters) {
@@ -126,7 +126,5 @@ class CourseController extends Controller
             WHERE id IN ({$ids})
         ");
         });
-
-        return back();
     }
 }

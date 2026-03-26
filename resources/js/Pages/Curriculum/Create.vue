@@ -54,7 +54,7 @@ const filteredCurricula = computed<Curriculum[]>(() => {
     // カリキュラム一覧の数+1をカリキュラム番号に入れる
     form.curriculum_number = curricula.length + 1
 
-    return chapter?.curricula ?? [];
+    return curricula;
 });
 
 // 登録処理

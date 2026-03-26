@@ -43,16 +43,36 @@ class ParticipantChapter extends Model
     // }
 
     // 登録チャプター内の1番目のカリキュラムを取得
-    public function firstCurriculum()
+    public function firstCurriculum():?Curriculum
     {
         // dd($this);
         $chapter = $this->chapter()->first();
         // dd($chapter);
         return $chapter->curricula()->where('curriculum_number',1)->first();
     }
+    /**
+     * 開始済みのカリキュラムが存在していたらtrue
+     */
     public function isStartChapter():bool
     {
         return $this->participantCurricula()->exists();
+    }
+    /**
+     * カリキュラムが登録されているチャプターを探索する
+     */
+    public function searchCurriculumInChapter():?Curriculum
+    {
+        $chapterOrder = 1;
+        $nextCurriculum = null;
+        while ($nextChapter = ParticipantChapter::where('participant_id', $this->participant_id)->where('chapter_order', $this->chapter_order + $chapterOrder)->first()) {
+            // dd($nextChapter);
+            if($nextChapter->chapter->isExistCurriculum()){
+                $nextCurriculum = $nextChapter->firstCurriculum();
+                break;
+            }
+            $chapterOrder += 1;
+        }
+        return $nextCurriculum;
     }
     // public function syncCurricula(int $number)
     // {

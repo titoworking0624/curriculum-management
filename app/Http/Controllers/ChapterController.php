@@ -125,7 +125,7 @@ class ChapterController extends Controller
     {
         //
     }
-    private function updateOrder(UpdateChapterRequest $request)
+    private function updateOrder(UpdateChapterRequest $request):void
     {
         $curricula = $request->curricula;
 
@@ -155,7 +155,5 @@ class ChapterController extends Controller
             WHERE id IN ({$ids})
         ");
         });
-
-        return back();
     }
 }

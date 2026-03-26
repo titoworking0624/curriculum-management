@@ -29,9 +29,9 @@ class Participant extends Model
         );
     }
     /**
-     * 現在の章を取得
+     * 現在のチャプターを取得
      */
-    public function currentChapter()
+    public function currentChapter() : ?ParticipantChapter
     {
         $current = $this->participantChapters()
             ->whereNotNull('participant_chapters.starting_date') // 課題が開始されている
@@ -48,7 +48,7 @@ class Participant extends Model
     /**
      * 現在の課題を取得する
      */
-    public function currentCurriculum()
+    public function currentCurriculum() : ?ParticipantCurriculum
     {
         $current = $this->participantCurricula()
             ->whereNull('participant_curricula.completion_date') // カリキュラム未完了
@@ -62,15 +62,16 @@ class Participant extends Model
     }
 
     /**
-     * 登録されている中で、次に進む章を取得
+     * 登録されている中で、次に進むチャプターを取得
      */
-    public function nextChapter()
+    public function nextChapter() : ?ParticipantChapter
     {
         $startingChapterCount = $this->startingChapterCount();
         // dd($startingChapterCount);
         if($startingChapterCount <= 1){
             $nextChapter = $this->participantChapters()
                 ->whereNull('participant_chapters.starting_date') // チャプター(章)を開始していない
+                ->whereNull('participant_chapters.completion_date') // 完了していないチャプター
                 ->orderBy('chapter_order') // チャプター順
                 ->first();
         }else{
@@ -92,7 +93,7 @@ class Participant extends Model
     /**
      * 現在の課題の一つ後の課題を取得
      */
-    public function nextCurrentCurriculum()
+    public function nextCurrentCurriculum(): ?Curriculum
     {
         // 現在の課題か完了している場合は一つ前の課題を取得
         $current = $this->currentCurriculum() ?? $this->prevCurriculum();
@@ -130,10 +131,15 @@ class Participant extends Model
                 $prevCurriculum = $completionCurriculum?->latest('id')->first()->curriculum;
                 // 完了したカリキュラムの次があればそれを返す
                 $nextCurriculum = $nextChapter->chapter->curricula()->where('curriculum_number', $prevCurriculum->curriculum_number + 1)->first();
-                if($nextCurriculum) return $nextCurriculum;
+                // if($nextCurriculum) return $nextCurriculum;
             }
-            // 次のチャプターの1番目のカリキュラムを返す
-            return $nextChapter?->firstCurriculum() ?? null;
+            // // 次のチャプターの1番目のカリキュラムを返す
+            // return $nextChapter?->firstCurriculum() ?? null;
+
+            // カリキュラムが登録されているチャプターを探索して、
+            if(!$nextCurriculum){
+                $nextCurriculum = $nextChapter->searchCurriculumInChapter();
+            }
         }
 
         return $nextCurriculum;
@@ -142,7 +148,7 @@ class Participant extends Model
     /**
      * 現在の課題の一つ前の（完了日が一番新しい）課題を取得
      */
-    public function prevCurriculum()
+    public function prevCurriculum():?ParticipantCurriculum
     {
         $prevCurriculum = $this->participantCurricula()
             ->whereNotNull('participant_curricula.completion_date') // 完了している課題
@@ -161,24 +167,30 @@ class Participant extends Model
     /**
      * 登録されている未開始のチャプターを開始し、最初のカリキュラムを開始する
      */
-    public function startCurriculum()
+    public function startCurriculum():void
     {
-        $nextChapter = $this->participantChapters() // 登録しているチャプター
-            ->whereNull('participant_chapters.completion_date') // 完了していないチャプター
-            ->orderBy('chapter_order') // 登録チャプター順
-            ->first();
-        // dd($next);
-        if (!$nextChapter) {
-            return;
-        }
-        // 登録チャプターを開始する
-        $nextChapter->update([
-            'starting_date' => now()
-        ]);
-        // そのチャプターのカリキュラム1番目開始
-        $firstCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
-            ->where('curriculum_number', 1)
-            ->first();
+        while($nextChapter = $this->nextChapter()){
+                // dd($next);
+                // if (!$nextChapter) {
+                //     return;
+                // }
+                // 登録チャプターを開始する
+                $nextChapter->update([
+                    'starting_date' => now()
+                ]);
+                // 登録チャプターにカリキュラムが登録されていない場合
+                if(!$nextChapter->chapter->isExistCurriculum()){
+                    $nextChapter->update([
+                        'completion_date' => now(),
+                    ]);
+                    continue;
+                }
+                // そのチャプターのカリキュラム1番目開始
+                $firstCurriculum = Curriculum::where('chapter_id', $nextChapter->chapter_id)
+                    ->where('curriculum_number', 1)
+                    ->first();
+                break;
+            }
 
         // 課題を登録
         ParticipantCurriculum::create([
@@ -208,8 +220,21 @@ class Participant extends Model
     /**
      * 登録チャプター内でカリキュラムが存在しない場合登録チャプターの開始日をnullにする
      */
-    public function chapterInNullCurriculum()
+    public function chapterInNullCurriculum():void
     {
+        // 完了したチャプター内にカリキュラムが存在していなかったら未完了状態にする
+        while($chapter = $this->finalCompletionChpater()){
+            // dd(!$chapter->isStartChapter());
+            if(!$chapter->isStartChapter()){
+                $chapter->update([
+                    'completion_date' => null,
+                ]);
+            }else{
+                break;
+            }
+        }
+
+        // 未完了（開始済み）のチャプターを取得
         $notCompletedChapters =
             $this
             ->participantChapters()
@@ -217,6 +242,7 @@ class Participant extends Model
             ->whereNotNull('starting_date')
             ->get();
 
+        // チャプター内にカリキュラムが存在していなかったら未開始状態にする
         foreach ($notCompletedChapters as $c) {
             if (!$c->participantCurricula()->exists()) {
                 $c->update([
@@ -228,7 +254,7 @@ class Participant extends Model
     /**
      * 開始しているチャプターを返す
      */
-    public function isStartChapter()
+    public function isStartChapter():?ParticipantChapter
     {
         $currentChapter =
             $this->participantChapters()
@@ -237,14 +263,14 @@ class Participant extends Model
                 ->orderBy('chapter_order')
                 ->first();
 
-        if(!$currentChapter) return false;
+        if(!$currentChapter) return null;
 
         return $currentChapter;
     }
     /**
      * Edit用Eagerロード
      */
-    public function participantInEdit()
+    public function participantInEdit():Participant
     {
         return $this->load([
             'participantCurricula' => function ($q) {
@@ -262,31 +288,58 @@ class Participant extends Model
     public function isChapterCorrect():bool
     {
         [$current,$currentChapter] = $this->currentCurriculumAndChapter();
+        if(!$currentChapter) return false;
 
         return $currentChapter?->id !== $current?->participantChapter->id;
     }
     /**
-     * 現在のチャプターのうち、次に進める課題を返す
+     * 開始済みのチャプターから、次に進める課題を返す
      */
-    public function reStartWithPrevChapter()
+    public function reStartWithPrevChapter():?Curriculum
     {
-        $currentChapter = $this->currentChapter();
+        // 現在のチャプターが取得出来なくなるまで次の課題を探す
+        while($currentChapter = $this->currentChapter()){
 
-        // 現在のチャプターの中で既に完了した課題を取得
-        $completionCurriculum = $this->participantCurricula()->where('chapter_id', $currentChapter?->chapter_id)->latest('id')?->first()?->curriculum;
+            // 現在のチャプターの中で既に完了した課題を取得
+            $completionCurriculum = $this->participantCurricula()->where('chapter_id', $currentChapter?->chapter_id)->latest('id')?->first()?->curriculum;
 
-        // 完了した課題の次のカリキュラムを取得
-        $nextCurriculum = $currentChapter?->chapter->curricula->where(
-            'curriculum_number',
-            $completionCurriculum->curriculum_number + 1
-        )->first();
+            // 完了した課題の次のカリキュラムを取得
+            $nextCurriculum = $currentChapter?->chapter->curricula->where(
+                'curriculum_number',
+                $completionCurriculum->curriculum_number + 1
+                )->first();
 
-        return $nextCurriculum;
+            // 次のカリキュラムが存在しなかった場合
+            if(!$nextCurriculum){
+                // 現在のチャプターを完了させる
+                $currentChapter->update([
+                    'completion_date' => now(),
+                ]);
+            // 次のカリキュラムが存在した場合
+            }else{
+                // ループから抜け出す
+                break;
+            }
+        }
+        return $nextCurriculum ?? null;
     }
+    /**
+     * 開始済みのチャプターの個数を返す
+    */
+    public function startingChapterCount() :int
+    {
+        $startingChapterCount = $this->participantChapters()
+        ->whereNull('participant_chapters.completion_date')
+        ->whereNotNull('participant_chapters.starting_date')
+        ->count();
+
+        return $startingChapterCount;
+        }
     /**
      * 現在のチャプターと直近の課題を取得する
      */
-    private function currentCurriculumAndChapter(){
+    private function currentCurriculumAndChapter():array
+    {
         $current = $this->currentCurriculum() ?? $this->prevCurriculum();
 
         $currentChapter = $this->currentChapter();
@@ -294,15 +347,11 @@ class Participant extends Model
         return [$current,$currentChapter];
     }
     /**
-     * 現在のチャプターの個数を返す
+     * 直近完了したチャプターを取得
      */
-    private function startingChapterCount() :int
+    private function finalCompletionChpater():?ParticipantChapter
     {
-        $startingChapterCount = $this->participantChapters()
-            ->whereNull('participant_chapters.completion_date')
-            ->whereNotNull('participant_chapters.starting_date')
-            ->count();
-
-        return $startingChapterCount;
+        return $this->participantChapters()->whereNotNull('completion_date')->latest('chapter_order')->first();
     }
+
 }

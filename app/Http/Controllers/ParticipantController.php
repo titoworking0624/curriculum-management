@@ -243,7 +243,7 @@ class ParticipantController extends Controller
     {
         //
     }
-    private function updateOrder(UpdateParticipantRequest $request, int $participantId)
+    private function updateOrder(UpdateParticipantRequest $request, int $participantId):void
     {
         // dd($request);
         // チャプター一覧
